@@ -1,89 +1,167 @@
 import { useState, useEffect, useRef } from 'react'
 
+/* ─── Data ─── */
 const SECTIONS = [
-  { id: 'hero', label: 'Home' },
-  { id: 'question', label: 'The Question' },
-  { id: 'two-questions', label: 'Two Questions' },
-  { id: 'factors', label: 'Four Factors' },
-  { id: 'modes', label: 'Seven Modes' },
-  { id: 'evidence', label: 'Evidence Base' },
-  { id: 'indicators', label: 'Cognitive IoCs' },
-  { id: 'curriculum', label: 'Curriculum' },
-  { id: 'caveats', label: 'Caveats' },
-  { id: 'next-steps', label: 'Next Steps' },
+  { id: 'hero', label: 'Home', short: '' },
+  { id: 'purpose', label: 'Purpose', short: 'Purpose' },
+  { id: 'summary', label: 'Summary', short: 'Summary' },
+  { id: 'explore', label: 'Explore', short: 'Explore' },
+  { id: 'question', label: 'The Question', short: 'Question' },
+  { id: 'two-questions', label: 'Two Questions', short: '2 Qs' },
+  { id: 'factors', label: 'Four Factors', short: 'Factors' },
+  { id: 'modes', label: 'Seven Modes', short: 'Modes' },
+  { id: 'evidence', label: 'Evidence Base', short: 'Evidence' },
+  { id: 'indicators', label: 'Cognitive IoCs', short: 'IoCs' },
+  { id: 'curriculum', label: 'Curriculum', short: 'Week 1' },
+  { id: 'caveats', label: 'Caveats', short: 'Caveats' },
+  { id: 'next-steps', label: 'Next Steps', short: 'Next' },
 ]
 
+const FACTORS = [
+  { num: 1, title: 'Skill First, or Tool First?', subtitle: 'Order of Exposure', evidence: 'Kosmyna et al. (MIT, 2025). N=54→18. Brain-to-LLM: engagement spikes. LLM-to-Brain: persistent under-engagement — 7/9 couldn’t quote own essays written minutes earlier.', caveat: '⚠️ N=9 sub-analysis, preprint — load-bearing single study', takeaway: 'For skills you want to own, do the effortful work first, then bring AI in for refinement.', doi: 'https://arxiv.org/abs/2506.08872', stat: '7/9', statLabel: 'couldn’t quote their own essays' },
+  { num: 2, title: 'Do You Know Where AI Is Reliable?', subtitle: 'Frontier Awareness', evidence: 'Dell’Acqua et al. (HBS, 2023). N=758 BCG consultants. Inside frontier: +12.2% productivity. Outside frontier: −19% accuracy. Shaw & Nave (Wharton, 2026). N=1,372. 40pp accuracy swing. Cohen’s h = 0.81.', takeaway: 'Every AI use benefits from: “Is this inside or outside what I can check?”', doi: 'https://ssrn.com/abstract=6097646', stat: '40pp', statLabel: 'accuracy swing from same AI' },
+  { num: 3, title: 'Did the Thinking Move, or Disappear?', subtitle: 'Effort Relocation', evidence: 'Lee et al. (Microsoft/CMU, 2025). N=319. Effort relocates upstream/downstream. Barcaui (2025). N=120. 45-day retention: d=0.68 loss. Fan et al. (BJET, 2024). N=117. “Metacognitive laziness” — better essays, no knowledge gain.', takeaway: 'Growth mode relocates effort. Decline mode eliminates it.', stat: 'd=0.68', statLabel: '45-day retention loss' },
+  { num: 4, title: 'Did You Tell AI What Kind of Help You Want?', subtitle: 'Configuration / Mode Contracts', evidence: 'Bastani et al. (PNAS, 2025). ~1,000 students across ~50 classrooms. Same GPT-4, same curriculum. Unguarded: −17% on exam. Guardrailed (hints, not answers): statistically indistinguishable from control. LearnLM (DeepMind, 2025): +5.5pp on novel transfer.', badge: 'Strongest actionable lever in the corpus', takeaway: 'Same model, same students, opposite outcomes — determined by the instructions.', doi: 'https://doi.org/10.1073/pnas.2422633122', stat: '−17%', statLabel: 'exam score, unguarded vs control' },
+]
+
+const MODE_COLORS = { neutral: '#8b95a5', warning: '#d97706', danger: '#b91c1c', growth: '#047857', conditional: '#0e7490', protected: '#6d28d9' }
+const MODE_BG = { neutral: 'rgba(139,149,165,0.06)', warning: 'rgba(217,119,6,0.06)', danger: 'rgba(185,28,28,0.06)', growth: 'rgba(4,120,87,0.06)', conditional: 'rgba(14,116,144,0.06)', protected: 'rgba(109,40,217,0.06)' }
+
+const MODES = [
+  { num: 0, name: 'Lookup', color: 'neutral', badge: 'Neutral', desc: 'Quick fact retrieval. Fine unless it leaks into strategic decisions.', prompt: '“What’s the exchange rate?” “How do you spell her name?”' },
+  { num: 1, name: 'Autopilot', color: 'warning', badge: 'Decline', desc: 'Accept AI output without engaging. Default state for every busy professional. Goal: notice before it bleeds into what matters.', prompt: 'You asked, you got, you used. You didn’t form your own view first.' },
+  { num: 2, name: 'Looking Good, Learning Nothing', color: 'danger', badge: 'Hidden Decline', desc: 'Decline disguised as growth. Output looks fine. Skill isn’t building. The bill comes due all at once: you can’t write without the tool, and your voice has started sounding like everybody else’s.', prompt: 'The grant narrative reads well. If AI vanished tomorrow, could you write it?' },
+  { num: 3, name: 'Stewardship', color: 'growth', badge: 'Growth', desc: 'You form your view first. AI proposes, you dispose. Effort relocated upstream and downstream. “Doing → stewarding.”', prompt: 'You wrote the shape. AI tightened the sentences. You kept the voice.' },
+  { num: 4, name: 'Sparring Partner', color: 'growth', badge: 'Growth', desc: 'You have a position. You ask AI to challenge it. Position first, critique second. The only feedback type shown to produce transfer learning.', prompt: '“Steelman the opposite view. Find the weakest link in my argument.”' },
+  { num: 5, name: 'Co-Pilot', color: 'conditional', badge: 'Conditional', desc: 'AI removes friction so you focus on judgment. Works when you have evaluative capacity. May flatten voice for high-skill writers.', prompt: 'AI generates six openings; you pick the one with the right tone and rewrite paragraph two.' },
+  { num: 6, name: 'Good Enough on Purpose', color: 'neutral', badge: 'Declared', desc: 'Conscious bounded delegation. Observable only via speech act: “I’m using AI for X. Not trying to learn this. I’ll spot-check Y. Budget Z minutes.”', prompt: 'If you didn’t say the sentence, you were in Mode 1.' },
+  { num: 7, name: 'Hands Off', color: 'protected', badge: 'Protected', desc: 'Work you keep AI out of on purpose. Not because AI can’t — because doing it yourself IS the point.', prompt: '“This one is mine.”' },
+]
+
+const STUDIES = [
+  { tier: 1, title: 'Cognitive Debt (EEG)', authors: 'Kosmyna et al.', venue: 'MIT Media Lab', year: 2025, n: '54→18', finding: 'LLM users: weakest brain connectivity. LLM-to-Brain participants couldn’t quote own essays (1/9 vs 7/9).', stars: 5, doi: 'https://arxiv.org/abs/2506.08872' },
+  { tier: 1, title: 'Cognitive Surrender', authors: 'Shaw & Nave', venue: 'Wharton / SSRN', year: 2026, n: '1,372', finding: '40pp accuracy swing from same AI. Cohen’s h=0.81. Confidence did NOT drop when wrong.', stars: 5, doi: 'https://ssrn.com/abstract=6097646' },
+  { tier: 1, title: 'Critical Thinking Impact', authors: 'Lee et al.', venue: 'Microsoft / CMU', year: 2025, n: '319', finding: 'GenAI confidence → less thinking (β=−0.69). Self-confidence → more (+0.31). Effort shifts, doesn’t vanish.', stars: 5 },
+  { tier: 1, title: 'Without Guardrails', authors: 'Bastani et al.', venue: 'PNAS', year: 2025, n: '~1,000', finding: 'Same GPT-4: −17% unguarded. 0% guardrailed. Configuration > willpower.', stars: 5, doi: 'https://doi.org/10.1073/pnas.2422633122' },
+  { tier: 1, title: 'Creativity vs. Diversity', authors: 'Doshi & Hauser', venue: 'Science Advances', year: 2024, n: '293+600', finding: 'Low-skill: +22% quality. High-skill: no gain + voice flattening toward model prior.', stars: 5, doi: 'https://doi.org/10.1126/sciadv.adn5290' },
+  { tier: 1, title: 'Metacognitive Laziness', authors: 'Fan et al.', venue: 'BJET', year: 2024, n: '117', finding: 'Better essays, NO knowledge gain. AI removes disfluency that triggers System 2 monitoring.', stars: 5, doi: 'https://doi.org/10.1111/bjet.13544' },
+  { tier: 1, title: 'AIGC Design Creativity', authors: 'Wang et al.', venue: 'Frontiers Psych.', year: 2025, n: '64', finding: 'd=1.02 concentration, d=0.55 creativity. Active partnership, not passive acceptance.', stars: 4, doi: 'https://doi.org/10.3389/fpsyg.2025.1508383' },
+  { tier: 1, title: 'Chatbot Feedback (fNIRS)', authors: 'Yin et al.', venue: 'npj Sci. Learning', year: 2025, n: '66', finding: 'Metacognitive feedback → transfer learning. Affective feedback → retention only.', stars: 4 },
+  { tier: 2, title: 'Jagged Frontier', authors: 'Dell’Acqua et al.', venue: 'HBS', year: 2023, n: '758', finding: '+12% in-frontier, −19% out-of-frontier. BCG field experiment.', stars: 5 },
+  { tier: 2, title: 'Political Persuasion', authors: 'Hackenburg et al.', venue: 'Science', year: 2025, n: '76,977', finding: 'Persuasion +51% but accuracy drops. Trade-off is structural, not accidental.', stars: 5, doi: 'https://doi.org/10.1126/science.aea3884' },
+  { tier: 2, title: 'LearnLM Tutoring', authors: 'DeepMind / Eedi', venue: 'Tech Report', year: 2025, n: '165', finding: '+5.5pp novel transfer. Pedagogical AI + human supervision = growth.', stars: 5 },
+  { tier: 2, title: 'Cognitive Crutch', authors: 'Barcaui', venue: 'SSH Open', year: 2025, n: '120', finding: '45-day delayed retention: 57.5% vs 68.5%. d=0.68.', stars: 5 },
+  { tier: 2, title: 'Tutor CoPilot', authors: 'Wang et al.', venue: 'Stanford', year: 2025, n: '2,700', finding: '+4pp mastery overall; +9pp for lowest-rated tutors. $20/tutor/year.', stars: 4 },
+  { tier: 2, title: 'AI vs. Active Learning', authors: 'Kestin et al.', venue: 'Harvard / Sci. Rep.', year: 2024, n: '—', finding: 'Purpose-built AI tutor beats in-class active learning on physics.', stars: 4 },
+  { tier: 2, title: 'Meta-analysis (51 studies)', authors: 'Wang & Fan', venue: 'Nature Portfolio', year: 2025, n: '51 studies', finding: 'g=0.867 on learning performance. Conditional on scaffolding.', stars: 4 },
+  { tier: 2, title: 'Psychosocial Effects', authors: 'Fang et al.', venue: 'MIT / OpenAI', year: 2025, n: '981', finding: 'Dose + disposition drive harm, not modality. 4-week longitudinal RCT.', stars: 5 },
+  { tier: 2, title: 'Children fMRI', authors: 'Horowitz-Kraus et al.', venue: 'bioRxiv', year: 2025, n: '31', finding: 'Children: lower frontoparietal connectivity during AI co-creation vs adults.', stars: 4 },
+  { tier: 2, title: 'How Americans View AI', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '5,023', finding: '53% say AI will worsen creative thinking. 50% say worse for relationships.', stars: 4, doi: 'https://www.pewresearch.org/science/2025/09/17/how-americans-view-ai-and-its-impact-on-people-and-society/' },
+  { tier: 2, title: 'Teens & AI Chatbots', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '1,458', finding: '64% of teens use chatbots. ~30% daily. Near-ubiquitous exposure.', stars: 4, doi: 'https://www.pewresearch.org/internet/2025/12/09/teens-social-media-and-ai-chatbots-2025/' },
+  { tier: 2, title: 'Illusions of Understanding', authors: 'Nature Editorial', venue: 'Nature', year: 2024, n: '—', finding: 'AI: “more but understanding less.” Scientific monocultures risk.', stars: 4 },
+  { tier: 2, title: '3R Principle', authors: 'Rossi et al.', venue: 'npj AI', year: 2026, n: '—', finding: 'Passive AI → synaptic weakening (LTD). Active co-creation → strengthening (LTP).', stars: 4 },
+]
+
+const INDICATORS = [
+  { name: 'Uncharacteristic agreement', signal: 'Accepting AI without pushback where you’d normally debate a colleague' },
+  { name: 'Compressed curiosity', signal: 'Stopping at the first answer instead of probing further' },
+  { name: 'Context drift', signal: 'Letting AI redefine the question you started with' },
+  { name: 'False familiarity', signal: 'Feeling you understand from an AI summary alone' },
+  { name: 'Judgment delegation', signal: 'Outsourcing a call that should be yours to make' },
+  { name: 'Confidence inflation', signal: 'Feeling more certain than your evidence warrants' },
+  { name: 'Verification fatigue', signal: 'Getting tired of checking and defaulting to acceptance' },
+  { name: 'Phrase contamination', signal: 'Your writing starting to sound like AI' },
+]
+
+const NEXT_STEPS = [
+  { area: 'PAI Accelerator', icon: '🎓', items: ['Integrate Week 1 module: modes, two questions, mode contracts', 'Mode 7 List exercise → Week 2', 'Mode Contracts → Week 3 Packages', 'Disagreement Audit → Week 4', 'Peer artifact review from Week 2 forward'] },
+  { area: 'MTM Together', icon: '🤝', items: ['“Mode of the Month” discussion series', 'Shareable Mode identification cards', 'Monthly retrospective audit template'] },
+  { area: 'Thought Leadership', icon: '✍️', items: ['Solve Tuesday #10 (1,200–1,500 words)', 'LinkedIn series: Problem → Framework → Practice', 'Conference talk for keynotes & TechSoup', 'Co-author with cognitive scientist'] },
+  { area: 'Client Advisory', icon: '🛡️', items: ['“Deliberate AI Use” policy template for vCISO work', 'Per-client Mode Contract library', 'Cognitive IoCs in security awareness training'] },
+  { area: 'Research & Development', icon: '🔬', items: ['Track Kosmyna replication (Factor 1 flag)', 'Pre/post pilot with Accelerator cohort', 'Explore Wharton / MIT collaboration', '90-day / 180-day longitudinal tracking'] },
+  { area: 'Nonprofit Sector', icon: '🌍', items: ['Position MTM as evidence-grounded voice', 'NTEN / AFP session proposal', 'Module for Nonprofit AI Safety Guide', 'Mode identification self-assessment tool'] },
+]
+
+/* ─── Hooks ─── */
 function useActiveSection() {
   const [active, setActive] = useState('hero')
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-        if (visible.length > 0) setActive(visible[0].target.id)
-      },
-      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
-    )
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
+    const obs = new IntersectionObserver(entries => {
+      const vis = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+      if (vis.length) setActive(vis[0].target.id)
+    }, { rootMargin: '-25% 0px -55% 0px', threshold: 0 })
+    SECTIONS.forEach(({ id }) => { const el = document.getElementById(id); if (el) obs.observe(el) })
+    return () => obs.disconnect()
   }, [])
   return active
 }
 
-function FadeIn({ children, className = '', delay = 0 }) {
+/* ─── Components ─── */
+function Reveal({ children, className = '', delay = 0 }) {
   const ref = useRef(null)
-  const [visible, setVisible] = useState(false)
+  const [vis, setVis] = useState(false)
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); observer.disconnect() }
-    }, { threshold: 0.1 })
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect() } }, { threshold: 0.08 })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
   }, [])
+  return <div ref={ref} className={`transition-all duration-[800ms] ease-out ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>
+}
+
+function SideNav() {
+  const active = useActiveSection()
   return (
-    <div ref={ref} className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
-      {children}
-    </div>
+    <nav className="fixed left-5 top-0 bottom-0 z-50 hidden lg:flex flex-col items-start justify-center gap-2.5">
+      {SECTIONS.filter(s => s.id !== 'hero').map(({ id, short }) => (
+        <a key={id} href={`#${id}`} className="group flex items-center gap-3 py-0.5" title={short}>
+          <div className={`nav-dot ${active === id ? 'active' : ''}`} />
+          <span className={`ui-text text-[10px] tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap ${active === id ? 'text-[#00b8a9] font-semibold' : 'text-[#9ca3af]'}`}>{short}</span>
+        </a>
+      ))}
+    </nav>
   )
 }
 
-function Nav() {
+function TopNav() {
   const active = useActiveSection()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#f8f7f4]/90 backdrop-blur-md border-b border-[#006d77]/10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-        <a href="#hero" className="font-sans font-semibold text-[#006d77] text-sm tracking-wide">THE METACOGNITION PLAYBOOK</a>
-        <button className="sm:hidden text-[#006d77]" onClick={() => setMenuOpen(!menuOpen)}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} /></svg>
+    <nav className="fixed top-0 left-0 right-0 z-50 lg:hidden bg-[#faf9f6]/85 backdrop-blur-xl border-b border-[#004d54]/8">
+      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-12">
+        <a href="#hero" className="ui-text font-bold text-[#004d54] text-xs tracking-wider uppercase">Metacognition Playbook</a>
+        <button className="text-[#004d54]" onClick={() => setOpen(!open)}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} /></svg>
         </button>
-        <div className={`${menuOpen ? 'flex' : 'hidden'} sm:flex absolute sm:relative top-14 sm:top-0 left-0 right-0 bg-[#f8f7f4] sm:bg-transparent flex-col sm:flex-row gap-1 sm:gap-0 p-4 sm:p-0 border-b sm:border-0 border-[#006d77]/10`}>
-          {SECTIONS.map(({ id, label }) => (
-            <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}
-              className={`font-sans text-xs px-2.5 py-1.5 rounded-full transition-colors ${active === id ? 'bg-[#006d77] text-white' : 'text-[#64748b] hover:text-[#006d77]'}`}>
-              {label}
-            </a>
+      </div>
+      {open && (
+        <div className="px-4 pb-4 flex flex-col gap-1 bg-[#faf9f6]/95 backdrop-blur-xl">
+          {SECTIONS.filter(s => s.id !== 'hero').map(({ id, label }) => (
+            <a key={id} href={`#${id}`} onClick={() => setOpen(false)} className={`ui-text text-xs py-2 px-3 rounded-lg transition-colors ${active === id ? 'bg-[#004d54] text-white' : 'text-[#6b7280] hover:text-[#004d54]'}`}>{label}</a>
           ))}
         </div>
-      </div>
+      )}
     </nav>
   )
 }
 
 function Hero() {
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center px-6 pt-14">
-      <div className="max-w-2xl text-center">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-sm font-semibold tracking-widest uppercase mb-6">Meet the Moment · Research Report</p></FadeIn>
-        <FadeIn delay={100}><h1 className="font-sans text-5xl sm:text-6xl font-bold text-[#006d77] leading-tight mb-4">The Metacognition Playbook</h1></FadeIn>
-        <FadeIn delay={200}><p className="font-sans text-xl text-[#64748b] mb-2">A Working Model for Deliberate AI Use</p></FadeIn>
-        <FadeIn delay={300}><p className="font-sans text-sm text-[#64748b] mb-8">Joshua Peskay · April 2026</p></FadeIn>
-        <FadeIn delay={400}><p className="text-lg text-[#1e293b]/80 leading-relaxed mb-12">A meta-analysis of 31 studies on how AI changes the way we think — and what to do about it.</p></FadeIn>
-        <FadeIn delay={500}>
-          <a href="#question" className="inline-block font-sans text-sm text-[#006d77] border border-[#006d77]/20 rounded-full px-6 py-2.5 hover:bg-[#006d77] hover:text-white transition-colors">Read the report ↓</a>
-        </FadeIn>
+    <section id="hero" className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#004d54]/[0.03] via-transparent to-[#00b8a9]/[0.04]" />
+      <div className="absolute top-20 right-[15%] w-[500px] h-[500px] rounded-full bg-[#00b8a9]/[0.04] blur-[100px]" />
+      <div className="absolute bottom-20 left-[10%] w-[400px] h-[400px] rounded-full bg-[#004d54]/[0.03] blur-[80px]" />
+      <div className="max-w-2xl text-center relative z-10">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.25em] uppercase mb-8">Meet the Moment · Research Report</p></Reveal>
+        <Reveal delay={120}><h1 className="text-[clamp(2.5rem,7vw,4.5rem)] leading-[1.05] text-[#004d54] mb-5">The Metacognition<br/>Playbook</h1></Reveal>
+        <Reveal delay={240}><p className="ui-text text-[17px] text-[#6b7280] font-light tracking-wide mb-2">A Working Model for Deliberate AI Use</p></Reveal>
+        <Reveal delay={320}><p className="ui-text text-[13px] text-[#9ca3af] mb-10">Joshua Peskay · April 2026</p></Reveal>
+        <Reveal delay={400}><p className="text-[18px] text-[#2d2d3f]/75 leading-relaxed max-w-lg mx-auto mb-14">A meta-analysis of 31 studies on how AI changes the way we think — and what to do about it.</p></Reveal>
+        <Reveal delay={500}>
+          <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#004d54] hover:text-white hover:border-[#004d54] transition-all duration-300 group">
+            Read the report
+            <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+          </a>
+        </Reveal>
       </div>
     </section>
   )
@@ -91,22 +169,22 @@ function Hero() {
 
 function TheQuestion() {
   return (
-    <section id="question" className="py-24 px-6">
-      <div className="max-w-2xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-8">The Question</p></FadeIn>
-        <FadeIn delay={100}><p className="text-2xl sm:text-3xl leading-snug text-[#1e293b] mb-8 font-sans font-light">Not <em>"does AI make you smarter or dumber"</em> — both are true in different conditions.</p></FadeIn>
-        <FadeIn delay={200}>
-          <blockquote className="border-l-4 border-[#00b8a9] pl-6 my-8">
-            <p className="text-lg leading-relaxed text-[#1e293b]/90">What are the distinguishable modes of working with AI, and which conditions determine whether a mode produces cognitive growth, cognitive decline, or neutral triage?</p>
+    <section id="question" className="py-28 px-6">
+      <div className="max-w-xl mx-auto">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-10">The Question</p></Reveal>
+        <Reveal delay={100}><p className="text-[clamp(1.4rem,3.5vw,1.85rem)] leading-[1.4] text-[#1a1a2e] mb-10" style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}>Not <em>“does AI make you smarter or dumber”</em> — both are true in different conditions.</p></Reveal>
+        <Reveal delay={180}>
+          <blockquote className="border-l-[3px] border-[#00b8a9] pl-7 my-10">
+            <p className="text-[17px] leading-[1.75] text-[#2d2d3f]/85">What are the distinguishable modes of working with AI, and which conditions determine whether a mode produces cognitive growth, cognitive decline, or neutral triage?</p>
           </blockquote>
-        </FadeIn>
-        <FadeIn delay={300}>
-          <div className="bg-[#f0efeb] rounded-xl p-6 my-8">
-            <p className="font-sans text-sm font-semibold text-[#006d77] mb-2">The answer in one sentence</p>
-            <p className="text-base leading-relaxed">Cognitive outcomes depend less on AI exposure than on four design variables, with metacognitive calibration as the master moderator.</p>
+        </Reveal>
+        <Reveal delay={260}>
+          <div className="bg-[#004d54] rounded-2xl p-7 my-10">
+            <p className="ui-text text-[11px] font-semibold text-[#00b8a9] tracking-[0.15em] uppercase mb-3">The answer in one sentence</p>
+            <p className="text-[16px] leading-[1.7] text-white/85">Cognitive outcomes depend less on AI exposure than on four design variables, with metacognitive calibration as the master moderator.</p>
           </div>
-        </FadeIn>
-        <FadeIn delay={400}><p className="text-lg leading-relaxed text-[#1e293b]/80">In plain English: it is not whether you use AI. It is not even how much. It is whether, in each interaction, you can answer two questions honestly.</p></FadeIn>
+        </Reveal>
+        <Reveal delay={340}><p className="text-[17px] leading-[1.75] text-[#2d2d3f]/70">In plain English: it is not whether you use AI. It is not even how much. It is whether, in each interaction, you can answer two questions honestly.</p></Reveal>
       </div>
     </section>
   )
@@ -114,81 +192,92 @@ function TheQuestion() {
 
 function TwoQuestions() {
   return (
-    <section id="two-questions" className="py-24 px-6 bg-[#006d77]">
-      <div className="max-w-3xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-8">The Heart of the Framework</p></FadeIn>
-        <FadeIn delay={100}><h2 className="font-sans text-3xl sm:text-4xl font-bold text-white mb-12">The Two Questions</h2></FadeIn>
-        <div className="grid sm:grid-cols-2 gap-6">
-          <FadeIn delay={200}>
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/10">
-              <div className="font-sans text-[#00b8a9] text-5xl font-bold mb-4">Q1</div>
-              <p className="text-xl text-white leading-relaxed font-sans">Am I trying to <strong className="text-[#00b8a9]">learn</strong> this, or <strong className="text-[#00b8a9]">finish</strong> it?</p>
-              <p className="text-sm text-white/60 mt-4 leading-relaxed">This routes you to a mode. Learning demands Modes 3, 4, or 5. Finishing invites Mode 6 — if you say so out loud.</p>
+    <section id="two-questions" className="py-32 px-6 bg-[#004d54] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#003d44] to-[#005a63]" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-[#00b8a9]/[0.08] blur-[120px]" />
+      <div className="max-w-3xl mx-auto relative z-10">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-6">The Heart of the Framework</p></Reveal>
+        <Reveal delay={100}><h2 className="text-[clamp(2rem,5vw,3rem)] text-white mb-16">The Two Questions</h2></Reveal>
+        <div className="grid sm:grid-cols-2 gap-8">
+          <Reveal delay={200}>
+            <div className="relative group">
+              <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-[#00b8a9]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-white/[0.06] backdrop-blur-sm rounded-2xl p-9 border border-white/[0.08]">
+                <div className="ui-text text-[#00b8a9]/60 text-[64px] font-black leading-none mb-5" style={{ fontFamily: 'var(--font-display)' }}>1</div>
+                <p className="text-[20px] text-white leading-snug mb-5" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>Am I trying to <span className="text-[#00b8a9]">learn</span> this, or <span className="text-[#00b8a9]">finish</span> it?</p>
+                <p className="text-[14px] text-white/45 leading-relaxed">This routes you to a mode. Learning demands Modes 3, 4, or 5. Finishing invites Mode 6 — if you say so out loud.</p>
+              </div>
             </div>
-          </FadeIn>
-          <FadeIn delay={300}>
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/10">
-              <div className="font-sans text-[#00b8a9] text-5xl font-bold mb-4">Q2</div>
-              <p className="text-xl text-white leading-relaxed font-sans">If the AI is wrong here, <strong className="text-[#00b8a9]">will I catch it?</strong></p>
-              <p className="text-sm text-white/60 mt-4 leading-relaxed">In a 1,372-person study, the same AI produced a 40-point accuracy swing — and users' confidence did <em>not</em> drop when they were wrong.</p>
+          </Reveal>
+          <Reveal delay={320}>
+            <div className="relative group">
+              <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-[#00b8a9]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-white/[0.06] backdrop-blur-sm rounded-2xl p-9 border border-white/[0.08]">
+                <div className="ui-text text-[#00b8a9]/60 text-[64px] font-black leading-none mb-5" style={{ fontFamily: 'var(--font-display)' }}>2</div>
+                <p className="text-[20px] text-white leading-snug mb-5" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>If the AI is wrong here, <span className="text-[#00b8a9]">will I catch it?</span></p>
+                <p className="text-[14px] text-white/45 leading-relaxed">In a 1,372-person study, the same AI produced a 40-point accuracy swing — and users’ confidence did <em>not</em> drop when they were wrong.</p>
+              </div>
             </div>
-          </FadeIn>
+          </Reveal>
         </div>
       </div>
     </section>
   )
 }
-
-const FACTORS = [
-  { num: 1, title: 'Skill First, or Tool First?', subtitle: 'Order of Exposure', evidence: 'Kosmyna et al. (MIT, 2025). N=54→18. Brain-to-LLM: engagement spikes. LLM-to-Brain: persistent under-engagement — 7/9 couldn\'t quote own essays.', caveat: '⚠️ N=9 sub-analysis, preprint', takeaway: 'For skills you want to own, do the effortful work first.', doi: 'https://arxiv.org/abs/2506.08872' },
-  { num: 2, title: 'Do You Know Where AI Is Reliable?', subtitle: 'Frontier Awareness', evidence: 'Dell\'Acqua et al. (HBS, 2023). N=758. In-frontier: +12%. Out-frontier: −19%. Shaw & Nave (Wharton, 2026). N=1,372. 40pp swing. h=0.81.', takeaway: '"Is this inside or outside what I can check?"', doi: 'https://ssrn.com/abstract=6097646' },
-  { num: 3, title: 'Did the Thinking Move, or Disappear?', subtitle: 'Effort Relocation', evidence: 'Lee et al. (Microsoft, 2025). N=319. Effort relocates. Barcaui (2025). d=0.68 retention loss at 45 days. Fan et al. (2024). "Metacognitive laziness."', takeaway: 'Growth mode relocates effort. Decline mode eliminates it.' },
-  { num: 4, title: 'Did You Tell AI What Kind of Help You Want?', subtitle: 'Configuration / Mode Contracts', evidence: 'Bastani et al. (PNAS, 2025). ~1,000 students. Unguarded: −17%. Guardrailed: no effect. LearnLM (DeepMind): +5.5pp transfer.', badge: '🔬 Strongest lever', takeaway: 'Same model, same students, opposite outcomes.', doi: 'https://doi.org/10.1073/pnas.2422633122' },
-]
 
 function Factors() {
   const [expanded, setExpanded] = useState(null)
   return (
-    <section id="factors" className="py-24 px-6">
+    <section id="factors" className="py-28 px-6">
       <div className="max-w-4xl mx-auto">
-        <FadeIn>
-          <p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">The Framework</p>
-          <h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-4">Four Design Factors</h2>
-          <p className="text-lg text-[#64748b] mb-6">+ one master moderator</p>
-        </FadeIn>
-        <FadeIn delay={100}>
-          <div className="bg-gradient-to-r from-[#006d77] to-[#00b8a9] rounded-2xl p-6 sm:p-8 mb-10 text-white">
-            <p className="font-sans text-xs font-semibold tracking-widest uppercase text-[#00b8a9]/80 mb-2">Master Moderator</p>
-            <h3 className="font-sans text-xl font-bold mb-3">Can You Still Tell When It's Wrong?</h3>
-            <p className="text-sm text-white/80 leading-relaxed mb-3">Confidence did NOT decline when participants were wrong alongside AI (Shaw & Nave). The calibration loop was severed.</p>
-            <p className="text-sm text-white/60 leading-relaxed">Metacognition is a demand, not an intervention. It needs environmental scaffolding to be sustainable.</p>
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Framework</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Four Design Factors</h2></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-10">+ one master moderator above them all</p></Reveal>
+
+        <Reveal delay={140}>
+          <div className="relative rounded-2xl overflow-hidden mb-12">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#004d54] via-[#006d77] to-[#00b8a9]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,184,169,0.2),transparent_60%)]" />
+            <div className="relative p-8 sm:p-10">
+              <p className="ui-text text-[11px] font-semibold text-[#00b8a9]/70 tracking-[0.15em] uppercase mb-3">Master Moderator</p>
+              <h3 className="text-[clamp(1.2rem,3vw,1.6rem)] text-white mb-4" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>Can You Still Tell When It’s Wrong?</h3>
+              <p className="text-[15px] text-white/75 leading-relaxed mb-3 max-w-2xl">Confidence did NOT decline when participants were wrong alongside AI (Shaw & Nave, β=−1.14, p=0.202). The calibration loop was severed.</p>
+              <p className="text-[14px] text-white/50 leading-relaxed max-w-2xl">Metacognition is a demand, not an intervention. It needs environmental scaffolding — Mode Contracts, verification rituals, peer review — to be sustainable.</p>
+            </div>
           </div>
-        </FadeIn>
-        <div className="grid gap-4">
+        </Reveal>
+
+        <div className="grid gap-5">
           {FACTORS.map((f, i) => (
-            <FadeIn key={f.num} delay={150 + i * 100}>
-              <div onClick={() => setExpanded(expanded === f.num ? null : f.num)} className="cursor-pointer w-full text-left bg-white rounded-xl border border-[#006d77]/10 hover:border-[#00b8a9]/30 transition-colors overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="font-sans text-3xl font-bold text-[#00b8a9]/30 shrink-0">{f.num}</div>
-                    <div className="flex-1">
-                      <h3 className="font-sans text-lg font-semibold text-[#006d77]">{f.title}</h3>
-                      <p className="font-sans text-xs text-[#64748b] mt-0.5">{f.subtitle}</p>
-                      {f.badge && <span className="inline-block font-sans text-xs bg-[#00b8a9]/10 text-[#006d77] px-2 py-0.5 rounded-full mt-2">{f.badge}</span>}
-                      <p className="text-sm text-[#1e293b]/70 mt-3 leading-relaxed">{f.takeaway}</p>
+            <Reveal key={f.num} delay={180 + i * 80}>
+              <div onClick={() => setExpanded(expanded === f.num ? null : f.num)} className="cursor-pointer bg-white rounded-xl border border-[#004d54]/8 hover:border-[#00b8a9]/25 transition-all duration-300 card-lift overflow-hidden">
+                <div className="p-6 sm:p-7">
+                  <div className="flex items-start gap-5">
+                    <div className="shrink-0 text-center">
+                      <div className="factor-num text-[32px] font-black text-[#00b8a9]/20 leading-none">{f.num}</div>
                     </div>
-                    <svg className={`w-5 h-5 text-[#64748b] shrink-0 transition-transform ${expanded === f.num ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[17px] text-[#004d54] mb-1" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{f.title}</h3>
+                      <p className="ui-text text-[11px] text-[#9ca3af] tracking-wide uppercase">{f.subtitle}</p>
+                      {f.badge && <span className="inline-block ui-text text-[10px] font-semibold bg-[#00b8a9]/8 text-[#006d77] px-2.5 py-1 rounded-full mt-3 tracking-wide">{f.badge}</span>}
+                      <p className="text-[15px] text-[#2d2d3f]/65 mt-3 leading-relaxed">{f.takeaway}</p>
+                    </div>
+                    <div className="shrink-0 hidden sm:block text-right">
+                      <div className="stat-number text-[2.5rem]">{f.stat}</div>
+                      <p className="ui-text text-[10px] text-[#9ca3af] mt-1 max-w-[120px] leading-tight">{f.statLabel}</p>
+                    </div>
+                    <svg className={`w-5 h-5 text-[#9ca3af] shrink-0 transition-transform duration-300 ${expanded === f.num ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                   {expanded === f.num && (
-                    <div className="mt-4 pt-4 border-t border-[#006d77]/5">
-                      <p className="text-sm text-[#1e293b]/70 leading-relaxed mb-2"><strong className="font-sans text-[#006d77]">Evidence:</strong> {f.evidence}</p>
-                      {f.caveat && <p className="font-sans text-xs text-[#f59e0b] bg-[#f59e0b]/10 px-3 py-1.5 rounded-lg inline-block mt-2">{f.caveat}</p>}
-                      {f.doi && <a href={f.doi} target="_blank" rel="noopener noreferrer" className="font-sans text-xs text-[#00b8a9] hover:underline block mt-2">View source →</a>}
+                    <div className="mt-5 pt-5 border-t border-[#004d54]/5 ml-[52px]">
+                      <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed mb-3"><strong className="ui-text text-[#004d54] font-semibold text-[12px] uppercase tracking-wide">Evidence: </strong>{f.evidence}</p>
+                      {f.caveat && <p className="ui-text text-[11px] text-[#d97706] bg-[#d97706]/8 px-3 py-2 rounded-lg inline-block mt-2">{f.caveat}</p>}
+                      {f.doi && <a href={f.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[11px] text-[#00b8a9] hover:underline block mt-3 font-medium">View source →</a>}
                     </div>
                   )}
                 </div>
               </div>
-            </FadeIn>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -196,104 +285,33 @@ function Factors() {
   )
 }
 
-const MODE_COLORS = { 'neutral': '#94a3b8', 'warning': '#f59e0b', 'danger': '#dc2626', 'growth': '#00b8a9', 'conditional': '#0891b2', 'protected': '#7c3aed' }
-const MODES = [
-  { num: 0, name: 'Lookup', color: 'neutral', badge: 'Neutral', desc: 'Quick fact retrieval. Fine unless it leaks into strategic decisions.', prompt: '"What\'s the exchange rate?" "How do you spell her name?"' },
-  { num: 1, name: 'Autopilot', color: 'warning', badge: '⚠️ Decline', desc: 'Accept AI output without engaging. Default state for every busy professional.', prompt: 'You asked, you got, you used. You didn\'t form your own view first.' },
-  { num: 2, name: 'Looking Good, Learning Nothing', color: 'danger', badge: '🔴 Hidden Decline', desc: 'Decline disguised as growth. Output looks fine. Skill isn\'t building. The bill comes due all at once.', prompt: 'The grant narrative reads well. If AI vanished tomorrow, could you write it?' },
-  { num: 3, name: 'Stewardship', color: 'growth', badge: '✅ Growth', desc: 'You form your view first. AI proposes, you dispose. "Doing → stewarding."', prompt: 'You wrote the shape. AI tightened the sentences. You kept the voice.' },
-  { num: 4, name: 'Sparring Partner', color: 'growth', badge: '✅ Growth', desc: 'You have a position. You ask AI to challenge it. The only feedback type shown to produce transfer learning.', prompt: '"Steelman the opposite view. Find the weakest link."' },
-  { num: 5, name: 'Co-Pilot', color: 'conditional', badge: '✅ Conditional', desc: 'AI removes friction so you focus on judgment. Works when you have evaluative capacity. May flatten voice for high-skill writers.', prompt: 'AI generates six openings; you pick the one with the right tone.' },
-  { num: 6, name: 'Good Enough on Purpose', color: 'neutral', badge: 'Declared', desc: 'Conscious bounded delegation. "I\'m using AI for X. Not trying to learn this. I\'ll spot-check Y. Budget Z minutes."', prompt: 'If you didn\'t say the sentence, you were in Mode 1.' },
-  { num: 7, name: 'Hands Off', color: 'protected', badge: '🟣 Protected', desc: 'Work you keep AI out of on purpose. Not because AI can\'t — because doing it yourself IS the point.', prompt: '"This one is mine."' },
-]
-
-function Modes() {
+function SevenModes() {
   return (
-    <section id="modes" className="py-24 px-6 bg-[#f0efeb]">
+    <section id="modes" className="py-28 px-6 bg-[#f2f0eb]">
       <div className="max-w-4xl mx-auto">
-        <FadeIn>
-          <p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">The Patterns</p>
-          <h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-4">Seven Modes of AI Use</h2>
-          <p className="text-lg text-[#64748b] mb-10">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p>
-        </FadeIn>
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Patterns</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Seven Modes of AI Use</h2></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-12 max-w-xl">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p></Reveal>
         <div className="grid gap-4">
           {MODES.map((m, i) => (
-            <FadeIn key={m.num} delay={i * 80}>
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow" style={{ borderLeft: `4px solid ${MODE_COLORS[m.color]}` }}>
-                <div className="flex items-start gap-4">
-                  <div className="font-sans text-3xl font-bold shrink-0" style={{ color: MODE_COLORS[m.color], opacity: 0.4 }}>{m.num}</div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-sans text-base font-semibold text-[#1e293b]">{m.name}</h3>
-                      <span className="font-sans text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: `${MODE_COLORS[m.color]}20`, color: MODE_COLORS[m.color] }}>{m.badge}</span>
-                    </div>
-                    <p className="text-sm text-[#1e293b]/70 leading-relaxed mt-2">{m.desc}</p>
-                    <p className="text-sm italic text-[#64748b] mt-2">{m.prompt}</p>
-                  </div>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-const STUDIES = [
-  { tier: 1, title: 'Cognitive Debt (EEG)', authors: 'Kosmyna et al.', venue: 'MIT Media Lab', year: 2025, n: '54→18', finding: 'LLM users: weakest connectivity. 7/9 couldn\'t quote own essays.', stars: 5, doi: 'https://arxiv.org/abs/2506.08872' },
-  { tier: 1, title: 'Cognitive Surrender', authors: 'Shaw & Nave', venue: 'Wharton / SSRN', year: 2026, n: '1,372', finding: '40pp accuracy swing. h=0.81. Confidence didn\'t drop when wrong.', stars: 5, doi: 'https://ssrn.com/abstract=6097646' },
-  { tier: 1, title: 'Critical Thinking Impact', authors: 'Lee et al.', venue: 'Microsoft / CMU', year: 2025, n: '319', finding: 'GenAI confidence → less thinking (β=−0.69). Self-confidence → more (+0.31).', stars: 5 },
-  { tier: 1, title: 'Without Guardrails', authors: 'Bastani et al.', venue: 'PNAS', year: 2025, n: '~1,000', finding: 'Same GPT-4: −17% unguarded. 0% guardrailed. Configuration > willpower.', stars: 5, doi: 'https://doi.org/10.1073/pnas.2422633122' },
-  { tier: 1, title: 'Creativity vs. Diversity', authors: 'Doshi & Hauser', venue: 'Science Advances', year: 2024, n: '293+600', finding: 'Low-skill: +22% quality. High-skill: no gain + voice flattening.', stars: 5, doi: 'https://doi.org/10.1126/sciadv.adn5290' },
-  { tier: 1, title: 'Metacognitive Laziness', authors: 'Fan et al.', venue: 'BJET', year: 2024, n: '117', finding: 'Better essays, NO knowledge gain. AI removes disfluency triggers.', stars: 5, doi: 'https://doi.org/10.1111/bjet.13544' },
-  { tier: 1, title: 'AIGC Design Creativity', authors: 'Wang et al.', venue: 'Frontiers Psych.', year: 2025, n: '64', finding: 'd=1.02 concentration, d=0.55 creativity. Active partnership works.', stars: 4, doi: 'https://doi.org/10.3389/fpsyg.2025.1508383' },
-  { tier: 1, title: 'Chatbot Feedback (fNIRS)', authors: 'Yin et al.', venue: 'npj Sci. Learning', year: 2025, n: '66', finding: 'Metacognitive feedback → transfer. Affective → retention only.', stars: 4 },
-  { tier: 2, title: 'Jagged Frontier', authors: 'Dell\'Acqua et al.', venue: 'HBS', year: 2023, n: '758', finding: '+12% in-frontier, −19% out-of-frontier.', stars: 5 },
-  { tier: 2, title: 'Political Persuasion', authors: 'Hackenburg et al.', venue: 'Science', year: 2025, n: '76,977', finding: 'Persuasion +51% but accuracy drops. Trade-off is structural.', stars: 5, doi: 'https://doi.org/10.1126/science.aea3884' },
-  { tier: 2, title: 'LearnLM Tutoring', authors: 'DeepMind / Eedi', venue: 'Tech Report', year: 2025, n: '165', finding: '+5.5pp novel transfer. Pedagogical AI + supervision = growth.', stars: 5 },
-  { tier: 2, title: 'Cognitive Crutch', authors: 'Barcaui', venue: 'SSH Open', year: 2025, n: '120', finding: '45-day retention: d=0.68 loss.', stars: 5 },
-  { tier: 2, title: 'Tutor CoPilot', authors: 'Wang et al.', venue: 'Stanford', year: 2025, n: '2,700', finding: '+4pp mastery; +9pp for weakest tutors. $20/yr.', stars: 4 },
-  { tier: 2, title: 'AI vs. Active Learning', authors: 'Kestin et al.', venue: 'Harvard / Sci. Rep.', year: 2024, n: '-', finding: 'Purpose-built AI tutor beats active learning.', stars: 4 },
-  { tier: 2, title: 'Meta-analysis (51 studies)', authors: 'Wang & Fan', venue: 'Nature Portfolio', year: 2025, n: '51 studies', finding: 'g=0.867 performance. Conditional on scaffolding.', stars: 4 },
-  { tier: 2, title: 'Psychosocial Effects', authors: 'Fang et al.', venue: 'MIT / OpenAI', year: 2025, n: '981', finding: 'Dose + disposition drive harm, not modality.', stars: 5 },
-  { tier: 2, title: 'Children fMRI', authors: 'Horowitz-Kraus et al.', venue: 'bioRxiv', year: 2025, n: '31', finding: 'Children: lower frontoparietal connectivity during AI use.', stars: 4 },
-  { tier: 2, title: 'How Americans View AI', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '5,023', finding: '53% say AI will worsen creative thinking.', stars: 4, doi: 'https://www.pewresearch.org/science/2025/09/17/how-americans-view-ai-and-its-impact-on-people-and-society/' },
-  { tier: 2, title: 'Teens & AI Chatbots', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '1,458', finding: '64% of teens use chatbots. ~30% daily.', stars: 4, doi: 'https://www.pewresearch.org/internet/2025/12/09/teens-social-media-and-ai-chatbots-2025/' },
-  { tier: 2, title: 'Illusions of Understanding', authors: 'Nature Editorial', venue: 'Nature', year: 2024, n: '-', finding: 'AI: "more but understanding less." Scientific monocultures.', stars: 4 },
-  { tier: 2, title: '3R Principle', authors: 'Rossi et al.', venue: 'npj AI', year: 2026, n: '-', finding: 'Passive → synaptic weakening. Active → strengthening.', stars: 4 },
-]
-
-function EvidenceBase() {
-  return (
-    <section id="evidence" className="py-24 px-6">
-      <div className="max-w-5xl mx-auto">
-        <FadeIn>
-          <p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">The Research</p>
-          <h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-4">Evidence Base</h2>
-          <p className="text-lg text-[#64748b] mb-10">31 studies. 8 anchor papers deep-read. 23 supporting studies skim-extracted.</p>
-        </FadeIn>
-        <div className="space-y-3">
-          {STUDIES.map((s, i) => (
-            <FadeIn key={i} delay={i * 30}>
-              <div className="bg-white rounded-lg p-4 border border-[#006d77]/5 hover:border-[#00b8a9]/20 transition-colors">
-                <div className="flex items-start gap-3">
-                  <span className={`font-sans text-[10px] px-1.5 py-0.5 rounded shrink-0 mt-0.5 ${s.tier === 1 ? 'bg-[#00b8a9]/10 text-[#006d77] font-semibold' : 'bg-[#006d77]/5 text-[#64748b]'}`}>{s.tier === 1 ? 'T1' : 'T2'}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-sans text-sm font-semibold text-[#1e293b] leading-snug">{s.title}</h4>
-                        <p className="font-sans text-xs text-[#64748b] mt-0.5">{s.authors} · {s.venue} · {s.year}{s.n && s.n !== '-' ? ` · N=${s.n}` : ''}</p>
+            <Reveal key={m.num} delay={140 + i * 60}>
+              <div className="rounded-xl overflow-hidden card-lift" style={{ background: MODE_BG[m.color] }}>
+                <div className="flex items-stretch">
+                  <div className="w-1.5 shrink-0" style={{ background: MODE_COLORS[m.color] }} />
+                  <div className="p-5 sm:p-6 flex items-start gap-5 flex-1">
+                    <div className="mode-num text-[28px] font-black shrink-0 leading-none mt-0.5" style={{ color: MODE_COLORS[m.color], opacity: 0.35 }}>{m.num}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap mb-2">
+                        <h3 className="text-[15px] text-[#1a1a2e] font-semibold" style={{ fontFamily: 'var(--font-display)' }}>{m.name}</h3>
+                        <span className="badge text-[9px] font-semibold px-2 py-[3px] rounded-full uppercase tracking-wider" style={{ background: `${MODE_COLORS[m.color]}15`, color: MODE_COLORS[m.color] }}>{m.badge}</span>
                       </div>
-                      <div className="font-sans text-xs text-[#00b8a9] shrink-0">{'★'.repeat(s.stars)}{'☆'.repeat(5 - s.stars)}</div>
+                      <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed">{m.desc}</p>
+                      <p className="text-[13px] italic text-[#9ca3af] mt-2.5 leading-relaxed">{m.prompt}</p>
                     </div>
-                    <p className="text-xs text-[#1e293b]/60 mt-1.5 leading-relaxed">{s.finding}</p>
-                    {s.doi && <a href={s.doi} target="_blank" rel="noopener noreferrer" className="font-sans text-[10px] text-[#00b8a9] hover:underline mt-1 inline-block">View source →</a>}
                   </div>
                 </div>
               </div>
-            </FadeIn>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -301,32 +319,76 @@ function EvidenceBase() {
   )
 }
 
-const INDICATORS = [
-  { name: 'Uncharacteristic agreement', signal: 'Accepting AI without pushback where you\'d normally debate' },
-  { name: 'Compressed curiosity', signal: 'Stopping at the first answer instead of probing' },
-  { name: 'Context drift', signal: 'Letting AI redefine the question you started with' },
-  { name: 'False familiarity', signal: 'Feeling you understand from an AI summary alone' },
-  { name: 'Judgment delegation', signal: 'Outsourcing a call that should be yours' },
-  { name: 'Confidence inflation', signal: 'Feeling more certain than your evidence warrants' },
-  { name: 'Verification fatigue', signal: 'Getting tired of checking and defaulting to acceptance' },
-  { name: 'Phrase contamination', signal: 'Your writing starting to sound like AI' },
-]
+function Evidence() {
+  const t1 = STUDIES.filter(s => s.tier === 1)
+  const t2 = STUDIES.filter(s => s.tier === 2)
+  return (
+    <section id="evidence" className="py-28 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Research</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Evidence Base</h2></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-12">31 studies. 8 anchor papers deep-read. 23 supporting studies skim-extracted.</p></Reveal>
+
+        <Reveal delay={140}><h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.15em] uppercase mb-5">Tier 1 — Anchor Papers</h3></Reveal>
+        <div className="grid sm:grid-cols-2 gap-4 mb-14">
+          {t1.map((s, i) => (
+            <Reveal key={i} delay={180 + i * 40}>
+              <div className="bg-white rounded-xl p-5 border border-[#004d54]/8 card-lift h-full">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h4 className="ui-text text-[13px] font-bold text-[#004d54] leading-snug">{s.title}</h4>
+                  <div className="ui-text text-[11px] text-[#00b8a9] shrink-0">{'★'.repeat(s.stars)}{'☆'.repeat(5 - s.stars)}</div>
+                </div>
+                <p className="ui-text text-[10px] text-[#9ca3af] mb-2.5">{s.authors} · {s.venue} · {s.year}{s.n && s.n !== '—' ? ` · N=${s.n}` : ''}</p>
+                <p className="text-[13px] text-[#2d2d3f]/55 leading-relaxed">{s.finding}</p>
+                {s.doi && <a href={s.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[10px] text-[#00b8a9] hover:underline mt-2.5 inline-block font-medium">View source →</a>}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal><h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.15em] uppercase mb-5">Tier 2 — Supporting Evidence</h3></Reveal>
+        <div className="space-y-2">
+          {t2.map((s, i) => (
+            <Reveal key={i} delay={i * 25}>
+              <div className="bg-white/60 rounded-lg px-4 py-3 border border-[#004d54]/4 hover:border-[#00b8a9]/15 transition-colors flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <h4 className="ui-text text-[12px] font-semibold text-[#1a1a2e]">{s.title}</h4>
+                    <span className="ui-text text-[10px] text-[#9ca3af]">{s.authors} · {s.venue} · {s.year}{s.n && s.n !== '—' ? ` · N=${s.n}` : ''}</span>
+                  </div>
+                  <p className="text-[12px] text-[#2d2d3f]/45 mt-1 leading-relaxed">{s.finding}</p>
+                </div>
+                <div className="ui-text text-[10px] text-[#00b8a9] shrink-0 mt-0.5">{'★'.repeat(s.stars)}</div>
+                {s.doi && <a href={s.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[9px] text-[#00b8a9] hover:underline shrink-0 mt-0.5">→</a>}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 function CognitiveIoCs() {
   return (
-    <section id="indicators" className="py-24 px-6 bg-[#006d77]">
-      <div className="max-w-3xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">Early Warning System</p></FadeIn>
-        <FadeIn delay={100}><h2 className="font-sans text-3xl sm:text-4xl font-bold text-white mb-4">Cognitive Indicators of Compromise</h2></FadeIn>
-        <FadeIn delay={150}><p className="text-base text-white/60 mb-10">Adapted from Allen Westley's cognitive security work (CSI #91). Behavioral tells that you're drifting into Mode 1 or Mode 2.</p></FadeIn>
+    <section id="indicators" className="py-28 px-6 bg-[#004d54] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#003d44] to-[#005a63]" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-[#d97706]/[0.04] blur-[100px]" />
+      <div className="max-w-3xl mx-auto relative z-10">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Early Warning System</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-white mb-4">Cognitive Indicators<br className="hidden sm:block" /> of Compromise</h2></Reveal>
+        <Reveal delay={100}><p className="text-[15px] text-white/50 mb-12 max-w-lg">Adapted from Allen Westley’s cognitive security work (CSI #91). Behavioral tells that you’re drifting into Mode 1 or Mode 2.</p></Reveal>
         <div className="space-y-3">
           {INDICATORS.map((ind, i) => (
-            <FadeIn key={i} delay={200 + i * 60}>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 flex gap-4">
-                <div className="w-2 h-2 rounded-full bg-[#f59e0b] mt-2 shrink-0"></div>
-                <div><h4 className="font-sans text-sm font-semibold text-white">{ind.name}</h4><p className="text-sm text-white/50 mt-1">{ind.signal}</p></div>
+            <Reveal key={i} delay={140 + i * 50}>
+              <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-5 flex gap-5 hover:bg-white/[0.06] transition-colors">
+                <div className="w-[6px] h-[6px] rounded-full bg-[#d97706] mt-2.5 shrink-0 ring-2 ring-[#d97706]/20" />
+                <div>
+                  <h4 className="ui-text text-[13px] font-semibold text-white/90">{ind.name}</h4>
+                  <p className="text-[14px] text-white/40 mt-1 leading-relaxed">{ind.signal}</p>
+                </div>
               </div>
-            </FadeIn>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -335,25 +397,29 @@ function CognitiveIoCs() {
 }
 
 function Curriculum() {
+  const items = [
+    { title: 'The Two-Question Habit', desc: 'Before every significant AI interaction: Q1 (learn or finish?) and Q2 (will I catch a wrong answer?). Clunky for a week, then infrastructure.', icon: '❓' },
+    { title: 'Three Mode Contract Templates', desc: 'For Learning: “Don’t give me the answer until I show my work.” For Stewardship: “Critique, don’t rewrite. Keep my voice.” For Sparring: “Steelman the opposite position.”', icon: '📜' },
+    { title: 'Mode 7 List', desc: 'Write down 2–3 kinds of work where AI does not get a seat at the table. Revisit once a year.', icon: '🛑' },
+    { title: 'Three Self-Check Layers', desc: 'Daily: Two Questions. Weekly: Artifact review (one transcript, four questions). Monthly: “Could I still do this tomorrow if AI disappeared?”', icon: '🔍' },
+    { title: 'Week 1 Exercises', desc: '(1) Review three real AI transcripts against the seven modes. (2) Write three Mode Contracts + your Mode 7 list. (3) Speech Act: say the Mode 6 sentence to a pod partner.', icon: '📝' },
+  ]
   return (
-    <section id="curriculum" className="py-24 px-6">
+    <section id="curriculum" className="py-28 px-6">
       <div className="max-w-3xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">Week 1 Preview</p></FadeIn>
-        <FadeIn delay={50}><h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-10">The Curriculum Module</h2></FadeIn>
-        <div className="space-y-6">
-          {[
-            { title: 'The Two-Question Habit', desc: 'Before every significant AI interaction: Q1 (learn or finish?) and Q2 (will I catch a wrong answer?). Clunky for a week, then infrastructure.' },
-            { title: 'Three Mode Contract Templates', desc: 'For Learning: "Don\'t give me the answer until I show my work." For Stewardship: "Critique, don\'t rewrite. Keep my voice." For Sparring: "Steelman the opposite position."' },
-            { title: 'Mode 7 List', desc: 'Write down 2-3 kinds of work where AI does not get a seat at the table. Revisit once a year.' },
-            { title: 'Three Self-Check Layers', desc: 'Daily: Two Questions. Weekly: Artifact review (one transcript, four questions). Monthly: "Could I still do this tomorrow if AI disappeared?"' },
-            { title: 'Week 1 Exercises', desc: '(1) Review three real AI transcripts against the seven modes. (2) Write three Mode Contracts + your Mode 7 list. (3) Speech Act: say the Mode 6 sentence to a pod partner.' },
-          ].map((item, i) => (
-            <FadeIn key={i} delay={100 + i * 60}>
-              <div className="bg-white rounded-xl border border-[#006d77]/10 p-6">
-                <h3 className="font-sans text-lg font-semibold text-[#006d77] mb-3">{item.title}</h3>
-                <p className="text-sm text-[#1e293b]/70 leading-relaxed">{item.desc}</p>
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Week 1 Preview</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-12">The Curriculum Module</h2></Reveal>
+        <div className="space-y-5">
+          {items.map((item, i) => (
+            <Reveal key={i} delay={100 + i * 60}>
+              <div className="bg-white rounded-xl border border-[#004d54]/8 p-6 card-lift flex gap-5">
+                <div className="text-2xl shrink-0 mt-0.5">{item.icon}</div>
+                <div>
+                  <h3 className="text-[16px] text-[#004d54] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{item.title}</h3>
+                  <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed">{item.desc}</p>
+                </div>
               </div>
-            </FadeIn>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -363,25 +429,28 @@ function Curriculum() {
 
 function Caveats() {
   const items = [
-    'Not all AI use is harmful — growth modes are real when configured well',
+    'Not all AI use is harmful — growth modes are real when configured and scaffolded well',
     'Metacognitive awareness alone is not sufficient — needs Mode Contracts, rituals, peer review',
     'Research is mostly students and knowledge workers — nonprofit generalization is extrapolation',
     'Mode 6 has zero direct empirical support — operationalized via speech act',
     'Factor 1 (Kosmyna) rests on N=9 in a preprint sub-analysis',
-    'Growth-mode evidence is thinner than decline-mode evidence',
+    'Growth-mode evidence is thinner than decline-mode evidence in this corpus',
     'The framework may need rewriting when longitudinal data on professionals arrives',
     'The author sells a PAI Accelerator — conflict of interest disclosed',
   ]
   return (
-    <section id="caveats" className="py-24 px-6 bg-[#f0efeb]">
-      <div className="max-w-3xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">Epistemic Honesty</p></FadeIn>
-        <FadeIn delay={50}><h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-10">What This Framework Does Not Claim</h2></FadeIn>
-        <div className="space-y-4">
+    <section id="caveats" className="py-28 px-6 bg-[#f2f0eb]">
+      <div className="max-w-2xl mx-auto">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Epistemic Honesty</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-12">What This Framework<br/>Does Not Claim</h2></Reveal>
+        <div className="space-y-5">
           {items.map((item, i) => (
-            <FadeIn key={i} delay={100 + i * 50}>
-              <div className="flex gap-3 items-start"><span className="text-[#00b8a9] mt-1 shrink-0">○</span><p className="text-base text-[#1e293b]/70 leading-relaxed">{item}</p></div>
-            </FadeIn>
+            <Reveal key={i} delay={100 + i * 40}>
+              <div className="flex gap-4 items-start">
+                <div className="w-[6px] h-[6px] rounded-full bg-[#00b8a9]/40 mt-2.5 shrink-0" />
+                <p className="text-[16px] text-[#2d2d3f]/65 leading-relaxed">{item}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -389,33 +458,25 @@ function Caveats() {
   )
 }
 
-const NEXT_STEPS = [
-  { area: 'PAI Accelerator', items: ['Integrate Week 1 module: modes, two questions, mode contracts', 'Mode 7 List exercise → Week 2', 'Mode Contracts → Week 3 Packages', 'Disagreement Audit → Week 4', 'Peer artifact review from Week 2 forward'] },
-  { area: 'MTM Together', items: ['"Mode of the Month" discussion series', 'Shareable Mode identification cards', 'Monthly retrospective audit template'] },
-  { area: 'Thought Leadership', items: ['Solve Tuesday #10 (1,200-1,500 words)', 'LinkedIn series: Problem → Framework → Practice', 'Conference talk for keynotes & TechSoup', 'Co-author with cognitive scientist'] },
-  { area: 'Client Advisory', items: ['"Deliberate AI Use" policy template for vCISO work', 'Per-client Mode Contract library', 'Cognitive IoCs in security awareness training'] },
-  { area: 'Research & Development', items: ['Track Kosmyna replication (Factor 1 flag)', 'Pre/post pilot with Accelerator cohort', 'Explore Wharton / MIT collaboration', '90-day / 180-day longitudinal tracking'] },
-  { area: 'Nonprofit Sector', items: ['Position MTM as evidence-grounded voice', 'NTEN / AFP session proposal', 'Module for Nonprofit AI Safety Guide', 'Mode identification self-assessment tool'] },
-]
-
 function NextSteps() {
   return (
-    <section id="next-steps" className="py-24 px-6">
+    <section id="next-steps" className="py-28 px-6">
       <div className="max-w-4xl mx-auto">
-        <FadeIn><p className="font-sans text-[#00b8a9] text-xs font-semibold tracking-widest uppercase mb-4">Looking Forward</p></FadeIn>
-        <FadeIn delay={50}><h2 className="font-sans text-3xl sm:text-4xl font-bold text-[#006d77] mb-10">Next Steps for MTM</h2></FadeIn>
-        <div className="grid sm:grid-cols-2 gap-6">
+        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Looking Forward</p></Reveal>
+        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-12">Next Steps for MTM</h2></Reveal>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {NEXT_STEPS.map((section, i) => (
-            <FadeIn key={i} delay={100 + i * 60}>
-              <div className="bg-white rounded-xl border border-[#006d77]/10 p-6 h-full">
-                <h3 className="font-sans text-sm font-semibold text-[#00b8a9] mb-4">{section.area}</h3>
-                <ul className="space-y-2">
+            <Reveal key={i} delay={100 + i * 60}>
+              <div className="bg-white rounded-xl border border-[#004d54]/8 p-6 h-full card-lift">
+                <div className="text-xl mb-3">{section.icon}</div>
+                <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-wide uppercase mb-4">{section.area}</h3>
+                <ul className="space-y-2.5">
                   {section.items.map((item, j) => (
-                    <li key={j} className="flex gap-2 items-start"><span className="text-[#00b8a9] text-xs mt-1">→</span><span className="text-sm text-[#1e293b]/70 leading-relaxed">{item}</span></li>
+                    <li key={j} className="flex gap-2 items-start"><span className="text-[#00b8a9] text-[11px] mt-[3px] shrink-0">→</span><span className="text-[13px] text-[#2d2d3f]/60 leading-relaxed">{item}</span></li>
                   ))}
                 </ul>
               </div>
-            </FadeIn>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -425,17 +486,244 @@ function NextSteps() {
 
 function Footer() {
   return (
-    <footer className="py-16 px-6 bg-[#006d77] text-white/60">
-      <div className="max-w-3xl mx-auto text-center space-y-4">
-        <p className="font-sans text-sm">This report was produced by Vishali, Joshua Peskay's Personal AI, using 31 research sources, 4-voice council review, and 4-persona audience validation.</p>
-        <p className="font-sans text-sm">The analysis, framework, and editorial voice are Joshua's. The synthesis was AI-assisted and human-directed.</p>
-        <div className="flex justify-center gap-6 pt-4 font-sans text-xs text-[#00b8a9]"><span>mtm.now</span><span>·</span><span>PAI Accelerator</span><span>·</span><span>MTM Together</span><span>·</span><span>Solve Tuesday</span></div>
-        <p className="font-sans text-xs text-white/30 pt-4">© 2026 Meet the Moment. All rights reserved.</p>
+    <footer className="py-20 px-6 bg-[#004d54] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#003038] to-[#004d54]" />
+      <div className="max-w-2xl mx-auto text-center relative z-10 space-y-5">
+        <div className="w-12 h-[2px] bg-[#00b8a9]/30 mx-auto mb-8" />
+        <p className="text-[14px] text-white/45 leading-relaxed">This report was produced by Vishali, Joshua Peskay’s Personal AI, using 31 research sources, 4-voice council review, and 4-persona audience validation.</p>
+        <p className="text-[14px] text-white/45 leading-relaxed">The analysis, framework, and editorial voice are Joshua’s. The synthesis was AI-assisted and human-directed.</p>
+        <div className="flex justify-center gap-5 pt-6 ui-text text-[11px] text-[#00b8a9]/70 font-medium tracking-wide">
+          <span>mtm.now</span><span className="text-white/10">·</span><span>PAI Accelerator</span><span className="text-white/10">·</span><span>MTM Together</span><span className="text-white/10">·</span><span>Solve Tuesday</span>
+        </div>
+        <p className="ui-text text-[10px] text-white/20 pt-6">© 2026 Meet the Moment. All rights reserved.</p>
       </div>
     </footer>
   )
 }
 
+/* ─── New Sections: Purpose, Executive Summary, Explore ─── */
+
+function Purpose() {
+  return (
+    <section id="purpose" className="py-24 px-6 bg-[#f2f0eb]">
+      <div className="max-w-2xl mx-auto">
+        <Reveal>
+          <p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-8">Why This Exists</p>
+        </Reveal>
+        <Reveal delay={80}>
+          <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] text-[#004d54] mb-8">Purpose of This Report</h2>
+        </Reveal>
+        <Reveal delay={140}>
+          <div className="space-y-5 text-[16px] leading-[1.8] text-[#2d2d3f]/75">
+            <p>There is a growing body of research on what happens to human cognition when we work alongside AI. Most of it lives behind academic paywalls, scattered across neuroscience, education, behavioral economics, and computer science journals. Very little of it has been synthesized for the people who need it most: professionals making daily decisions about how to use AI in their work.</p>
+            <p>This report assembles 31 studies into a single working model. It is written for <strong className="text-[#004d54] font-semibold">nonprofit professionals, knowledge workers, and anyone building a Personal AI</strong> who wants to understand what the research actually says about the difference between AI use that makes you sharper and AI use that makes you softer.</p>
+            <p>It was produced by <strong className="text-[#004d54] font-semibold">Meet the Moment (MTM)</strong> as the evidence base for our PAI Accelerator curriculum and as a contribution to the broader conversation about deliberate, ethical AI adoption. The framework, the caveats, and the conflict-of-interest disclosure are all intentional. We believe the sector deserves research-grounded guidance delivered with intellectual honesty.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={200}>
+          <div className="mt-10 grid sm:grid-cols-3 gap-4">
+            {[
+              { num: '31', label: 'studies reviewed' },
+              { num: '8', label: 'anchor papers deep-read' },
+              { num: '4', label: 'audience personas validated' },
+            ].map((s, i) => (
+              <div key={i} className="text-center py-5 px-4 bg-white rounded-xl border border-[#004d54]/6">
+                <div className="stat-number text-[2.5rem]">{s.num}</div>
+                <p className="ui-text text-[11px] text-[#9ca3af] mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+function ExecutiveSummary() {
+  return (
+    <section id="summary" className="py-28 px-6">
+      <div className="max-w-2xl mx-auto">
+        <Reveal>
+          <p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-8">If You Read Nothing Else</p>
+        </Reveal>
+        <Reveal delay={80}>
+          <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] text-[#004d54] mb-10">Executive Summary</h2>
+        </Reveal>
+
+        <div className="space-y-8">
+          <Reveal delay={120}>
+            <div>
+              <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">The question</h3>
+              <p className="text-[16px] leading-[1.8] text-[#2d2d3f]/75">Does AI make us smarter or dumber? The research says: both, depending on how you use it. The real question is what distinguishes the patterns that produce cognitive growth from those that produce cognitive decline.</p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={160}>
+            <div>
+              <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">The framework</h3>
+              <p className="text-[16px] leading-[1.8] text-[#2d2d3f]/75 mb-4">Four design factors determine outcomes, with metacognitive calibration as the master moderator:</p>
+              <div className="space-y-2.5 ml-1">
+                {[
+                  ['1. Skill First, or Tool First?', 'Build the skill before adding the tool. The reverse creates persistent dependency.'],
+                  ['2. Do You Know Where AI Is Reliable?', 'AI\'s capability boundary is jagged and invisible. Default to verification outside known-reliable zones.'],
+                  ['3. Did the Thinking Move, or Disappear?', 'Growth mode relocates effort upstream and downstream. Decline mode eliminates it entirely.'],
+                  ['4. Did You Tell AI What Kind of Help You Want?', 'Same model, same task, opposite outcomes — determined by the instructions. This is the strongest lever.'],
+                ].map(([title, desc], i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <div className="w-1 h-1 rounded-full bg-[#00b8a9] mt-2.5 shrink-0" />
+                    <div><span className="ui-text text-[13px] font-semibold text-[#004d54]">{title}</span> <span className="text-[14px] text-[#2d2d3f]/60">{desc}</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={200}>
+            <div>
+              <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">The seven modes</h3>
+              <p className="text-[16px] leading-[1.8] text-[#2d2d3f]/75 mb-4">Every AI interaction falls into one of seven patterns. The goal is not to always be in a growth mode — it is to know which mode you are in:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { name: 'Autopilot', color: '#d97706', type: 'decline' },
+                  { name: 'Looking Good', color: '#b91c1c', type: 'decline' },
+                  { name: 'Stewardship', color: '#047857', type: 'growth' },
+                  { name: 'Sparring', color: '#047857', type: 'growth' },
+                  { name: 'Co-Pilot', color: '#0e7490', type: 'conditional' },
+                  { name: 'Good Enough', color: '#8b95a5', type: 'declared' },
+                  { name: 'Hands Off', color: '#6d28d9', type: 'protected' },
+                  { name: 'Lookup', color: '#8b95a5', type: 'neutral' },
+                ].map((m, i) => (
+                  <div key={i} className="text-center py-2.5 px-2 rounded-lg" style={{ background: `${m.color}08`, borderLeft: `2px solid ${m.color}` }}>
+                    <p className="ui-text text-[11px] font-semibold" style={{ color: m.color }}>{m.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={240}>
+            <div>
+              <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">The two questions</h3>
+              <p className="text-[16px] leading-[1.8] text-[#2d2d3f]/75">Before any significant AI interaction, ask: <strong className="text-[#004d54]">(1) Am I trying to learn this, or finish it?</strong> and <strong className="text-[#004d54]">(2) If the AI is wrong here, will I catch it?</strong> These two questions, used reflexively, route you to the right mode and keep the calibration loop intact.</p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={280}>
+            <div>
+              <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">The honest caveats</h3>
+              <p className="text-[16px] leading-[1.8] text-[#2d2d3f]/75">The research is mostly on students and knowledge workers, not nonprofit professionals. Growth-mode evidence is thinner than decline-mode evidence. One key finding rests on 9 participants. The author sells a training program this framework motivates. All of this is disclosed in full. We would rather you trust the hedging than be impressed by the confidence.</p>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const EXPLORE_PATHS = [
+  {
+    icon: '🔬',
+    title: 'I want to see the research',
+    desc: 'Browse the 31 studies — 8 anchor papers deep-read, 23 supporting studies skim-extracted — with effect sizes, sample sizes, and source links.',
+    links: [
+      { label: 'Evidence Base (31 studies)', href: '#evidence' },
+      { label: 'Four Design Factors', href: '#factors' },
+      { label: 'Epistemic Caveats', href: '#caveats' },
+    ],
+  },
+  {
+    icon: '🧭',
+    title: 'I want the practical framework',
+    desc: 'The seven modes, the two questions, Mode Contracts, and Cognitive Indicators of Compromise — the tools you can use starting today.',
+    links: [
+      { label: 'The Two Questions', href: '#two-questions' },
+      { label: 'Seven Modes of AI Use', href: '#modes' },
+      { label: 'Cognitive IoCs', href: '#indicators' },
+    ],
+  },
+  {
+    icon: '📋',
+    title: 'I want to teach this to my team',
+    desc: 'The Week 1 curriculum module: exercises, Mode Contract templates, the Mode 7 List, and a one-paragraph summary you can print on an index card.',
+    links: [
+      { label: 'Curriculum Module', href: '#curriculum' },
+      { label: 'Next Steps for MTM', href: '#next-steps' },
+    ],
+  },
+  {
+    icon: '❓',
+    title: 'I want the core question answered',
+    desc: 'Does AI make you smarter or dumber? The research question, the one-sentence answer, and why "it depends" is no longer good enough.',
+    links: [
+      { label: 'The Question', href: '#question' },
+      { label: 'The Two Questions', href: '#two-questions' },
+      { label: 'Master Moderator', href: '#factors' },
+    ],
+  },
+]
+
+function ExploreGuide() {
+  return (
+    <section id="explore" className="py-28 px-6 bg-[#004d54] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#003d44] via-[#004d54] to-[#005a63]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#00b8a9]/[0.05] blur-[120px]" />
+      <div className="max-w-4xl mx-auto relative z-10">
+        <Reveal>
+          <p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Navigate This Report</p>
+        </Reveal>
+        <Reveal delay={60}>
+          <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] text-white mb-4">Where does your curiosity lead?</h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <p className="text-[15px] text-white/50 mb-12 max-w-lg">This report is designed to be explored, not read linearly. Choose the path that matches what you need right now.</p>
+        </Reveal>
+
+        <div className="grid sm:grid-cols-2 gap-5">
+          {EXPLORE_PATHS.map((path, i) => (
+            <Reveal key={i} delay={140 + i * 60}>
+              <div className="bg-white/[0.05] border border-white/[0.08] rounded-xl p-6 hover:bg-white/[0.08] transition-colors h-full flex flex-col">
+                <div className="text-2xl mb-3">{path.icon}</div>
+                <h3 className="text-[16px] text-white mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{path.title}</h3>
+                <p className="text-[13px] text-white/45 leading-relaxed mb-5 flex-1">{path.desc}</p>
+                <div className="space-y-1.5">
+                  {path.links.map((link, j) => (
+                    <a key={j} href={link.href} className="flex items-center gap-2 ui-text text-[11px] text-[#00b8a9] hover:text-[#00b8a9]/80 font-medium transition-colors">
+                      <span className="text-[#00b8a9]/40">→</span>
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── App ─── */
 export default function App() {
-  return (<><Nav /><main><Hero /><TheQuestion /><TwoQuestions /><Factors /><Modes /><EvidenceBase /><CognitiveIoCs /><Curriculum /><Caveats /><NextSteps /></main><Footer /></>)
+  return (
+    <>
+      <SideNav />
+      <TopNav />
+      <main>
+        <Hero />
+        <Purpose />
+        <ExecutiveSummary />
+        <ExploreGuide />
+        <TheQuestion />
+        <TwoQuestions />
+        <Factors />
+        <SevenModes />
+        <Evidence />
+        <CognitiveIoCs />
+        <Curriculum />
+        <Caveats />
+        <NextSteps />
+      </main>
+      <Footer />
+    </>
+  )
 }
