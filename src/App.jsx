@@ -111,11 +111,11 @@ function Reveal({ children, className = '', delay = 0 }) {
 function SideNav() {
   const active = useActiveSection()
   return (
-    <nav className="fixed left-5 top-0 bottom-0 z-50 hidden lg:flex flex-col items-start justify-center gap-2.5">
+    <nav className="fixed left-5 top-0 bottom-0 z-50 hidden lg:flex flex-col items-start justify-center gap-1">
       {SECTIONS.filter(s => s.id !== 'hero').map(({ id, short }) => (
-        <a key={id} href={`#${id}`} className="group flex items-center gap-3 py-0.5" title={short}>
-          <div className={`nav-dot ${active === id ? 'active' : ''}`} />
-          <span className={`ui-text text-[10px] tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap ${active === id ? 'text-[#00b8a9] font-semibold' : 'text-[#9ca3af]'}`}>{short}</span>
+        <a key={id} href={`#${id}`} className="flex items-center gap-2.5 py-[5px] group transition-all duration-200" title={short}>
+          <div className={`w-[6px] h-[6px] rounded-full shrink-0 transition-all duration-300 ${active === id ? 'bg-[#00b8a9] scale-125 shadow-[0_0_0_3px_rgba(0,184,169,0.15)]' : 'bg-[#d1d5db] group-hover:bg-[#9ca3af]'}`} />
+          <span className={`ui-text text-[10px] tracking-[0.05em] whitespace-nowrap transition-all duration-200 ${active === id ? 'text-[#004d54] font-semibold' : 'text-[#b0b5be] group-hover:text-[#6b7280]'}`}>{short}</span>
         </a>
       ))}
     </nav>
