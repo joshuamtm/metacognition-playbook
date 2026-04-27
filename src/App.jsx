@@ -11,6 +11,7 @@ const SECTIONS = [
   { id: 'factors', label: 'Four Factors', short: 'Factors' },
   { id: 'modes', label: 'Seven Modes', short: 'Modes' },
   { id: 'evidence', label: 'Evidence Base', short: 'Evidence' },
+  { id: 'update-2026', label: 'April 2026 Update', short: 'Update' },
   { id: 'indicators', label: 'Cognitive IoCs', short: 'IoCs' },
   { id: 'curriculum', label: 'Curriculum', short: 'Week 1' },
   { id: 'caveats', label: 'Caveats', short: 'Caveats' },
@@ -60,6 +61,16 @@ const STUDIES = [
   { tier: 2, title: 'Teens & AI Chatbots', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '1,458', finding: '64% of teens use chatbots. ~30% daily. Near-ubiquitous exposure.', stars: 4, doi: 'https://www.pewresearch.org/internet/2025/12/09/teens-social-media-and-ai-chatbots-2025/' },
   { tier: 2, title: 'Illusions of Understanding', authors: 'Nature Editorial', venue: 'Nature', year: 2024, n: '—', finding: 'AI: “more but understanding less.” Scientific monocultures risk.', stars: 4 },
   { tier: 2, title: '3R Principle', authors: 'Rossi et al.', venue: 'npj AI', year: 2026, n: '—', finding: 'Passive AI → synaptic weakening (LTD). Active co-creation → strengthening (LTP).', stars: 4 },
+]
+
+/* New studies added in April 2026 update — published or surfaced after the original synthesis. */
+const STUDIES_2026 = [
+  { title: 'Explanation Gate (RCT)', authors: 'Gerber et al.', venue: 'ACM L@S ’26', year: 2026, n: '78', finding: 'Forcing users to explain AI-generated code in their own words before accepting it cut failure on a subsequent AI-blackout task from 77% to 39% — a 38.4 percentage-point gap from a single structural forcing function. Strongest empirical demonstration of the engaged/outsourced divide in 2026.', implication: 'Confirms Mode 4 Stewardship and Mode 5 Sparring Partner are not just heuristics — even minimal forced engagement produces transfer.', doi: 'https://arxiv.org/abs/2602.20206' },
+  { title: 'AI Timing & Critical Thinking', authors: 'CHI 2026 (Lee et al.)', venue: 'CHI ’26, Barcelona', year: 2026, n: '393', finding: 'Participants who delayed AI access until after partial independent problem-solving outperformed AI-first users on critical thinking tasks. Active engagement from minute one was nearly as harmful as passive use — because users adopted the AI’s framing before forming their own.', implication: 'New principle the original framework didn’t fully address: form your own view first, then spar. Active engagement is necessary but not sufficient.', doi: 'https://www.sciencenews.org/article/ai-timing-critical-thinking-study' },
+  { title: 'Outsourcing Thinking to AI?', authors: 'Tian & Zhang', venue: 'Humanities & Social Sciences Communications (Nature portfolio)', year: 2026, n: '698', finding: 'Same variable — perceived AI intelligence — simultaneously predicts focused immersion (positive pathway) and AI dependency (negative pathway). The mechanism is double-edged: the same engagement that protects can produce dependency in different users.', implication: 'Refines Factor 4 (Configuration). Disposition and individual differences moderate engagement’s protective effect.', doi: 'https://www.nature.com/articles/s41599-026-07153-8' },
+  { title: 'Cognitive Offloading in Schools', authors: 'Loble & Lodge', venue: 'UTS / UQ Synthesis', year: 2026, n: '~1,000', finding: 'High-school math RCT: AI raised scores while present, performance collapsed when AI was removed — gains didn’t transfer. Names the useful distinction between offloading extraneous cognitive load (safe) vs. intrinsic load — the struggle that builds schema (harmful when outsourced).', implication: 'Sharpens Mode 7 Hands Off. Helps answer the practical question: when is offloading safe?', doi: 'https://www.uts.edu.au/news/2026/03/experts-warn-unstructured-ai-use-in-schools-risks-cognitive-atrophy' },
+  { title: 'Brain Fry from AI Volume', authors: 'Bedard et al.', venue: 'HBR', year: 2026, n: '~1,500', finding: 'Heavy AI users — even engaged ones — reported cognitive fatigue: mental fog, slower decision-making, headaches. Different mechanism from outsourcing: the volume and pace of AI-mediated cognitive work exceeded human processing capacity.', implication: 'Counter-evidence to a strict engagement-protects-you reading. Engagement is necessary; dose still matters. Self-report only — lower confidence than the others.', doi: 'https://hbr.org/2026/03/when-using-ai-leads-to-brain-fry' },
+  { title: 'Homogenizing Effect of LLMs', authors: 'Sourati et al.', venue: 'Trends in Cognitive Sciences', year: 2026, n: '—', finding: 'Population-scale theoretical synthesis: LLMs standardize language, perspective, and reasoning, favoring linear chain-of-thought over intuitive and abstract modes. A population of engaged sparring users may still converge if all sparring with the same model.', implication: 'New dimension this framework doesn’t address: collective cognitive effects independent of individual engagement quality.', doi: 'https://www.cell.com/trends/cognitive-sciences/fulltext/S1364-6613(26)00003-3' },
 ]
 
 const INDICATORS = [
@@ -220,6 +231,14 @@ function TwoQuestions() {
             </div>
           </Reveal>
         </div>
+
+        <Reveal delay={440}>
+          <div className="mt-10 bg-white/[0.04] border border-[#00b8a9]/25 rounded-2xl p-7">
+            <p className="ui-text text-[#00b8a9] text-[10px] font-semibold tracking-[0.2em] uppercase mb-3">Timing Principle (April 2026 Update)</p>
+            <p className="text-[18px] text-white leading-snug mb-3" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>Form your own view first. Then spar.</p>
+            <p className="text-[14px] text-white/55 leading-relaxed">A CHI 2026 study (N=393) found that participants who delayed AI access until <em>after</em> some independent thinking outperformed AI-first users on critical thinking — even when both engaged actively the whole time. Active engagement is necessary, but if you reach for AI before you’ve formed your own view, you tend to anchor to its framing instead of yours.</p>
+          </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -369,6 +388,62 @@ function Evidence() {
   )
 }
 
+function Update2026() {
+  return (
+    <section id="update-2026" className="py-28 px-6 bg-[#f2f0eb]">
+      <div className="max-w-4xl mx-auto">
+        <Reveal>
+          <p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Living Document</p>
+        </Reveal>
+        <Reveal delay={60}>
+          <h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">April 2026 Update</h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <p className="text-[17px] text-[#6b7280] mb-12 max-w-2xl">A second research pass in late April 2026 surfaced six new findings published since the original synthesis. Most strengthen the framework. Two add dimensions the original did not address. None invalidate the seven modes or the two questions — but they sharpen them.</p>
+        </Reveal>
+
+        <Reveal delay={140}>
+          <div className="bg-white rounded-2xl border border-[#004d54]/8 p-7 mb-8">
+            <p className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-3">What changed in the framework</p>
+            <ul className="space-y-3 text-[15px] text-[#2d2d3f]/70 leading-relaxed">
+              <li className="flex gap-3"><span className="text-[#00b8a9] shrink-0 mt-1">→</span><span><strong className="text-[#004d54]">Timing principle added to the Two Questions</strong> — “Form your own view first. Then spar.” (CHI 2026)</span></li>
+              <li className="flex gap-3"><span className="text-[#00b8a9] shrink-0 mt-1">→</span><span><strong className="text-[#004d54]">Mode 7 Hands Off sharpened</strong> — Loble &amp; Lodge’s extraneous-vs-intrinsic load distinction tells you when offloading is safe.</span></li>
+              <li className="flex gap-3"><span className="text-[#00b8a9] shrink-0 mt-1">→</span><span><strong className="text-[#004d54]">Strongest 2026 evidence for the engaged/outsourced divide</strong> — Gerber et al.’s “Explanation Gate” closed a 38-point gap with one structural forcing function.</span></li>
+              <li className="flex gap-3"><span className="text-[#00b8a9] shrink-0 mt-1">→</span><span><strong className="text-[#004d54]">Two new dimensions the framework does not address</strong> — population-scale homogenization (Sourati) and cognitive fatigue from volume (Bedard). Both flagged as honest limits.</span></li>
+            </ul>
+          </div>
+        </Reveal>
+
+        <Reveal delay={180}>
+          <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.15em] uppercase mb-5">New studies (Jan–Apr 2026)</h3>
+        </Reveal>
+
+        <div className="space-y-4">
+          {STUDIES_2026.map((s, i) => (
+            <Reveal key={i} delay={220 + i * 50}>
+              <div className="bg-white rounded-xl p-6 border border-[#004d54]/8 card-lift">
+                <div className="flex items-start justify-between gap-4 mb-2 flex-wrap">
+                  <h4 className="ui-text text-[14px] font-bold text-[#004d54] leading-snug">{s.title}</h4>
+                  <span className="ui-text text-[10px] text-[#9ca3af] shrink-0">{s.authors} · {s.venue} · {s.year}{s.n && s.n !== '—' ? ` · N=${s.n}` : ''}</span>
+                </div>
+                <p className="text-[14px] text-[#2d2d3f]/65 leading-relaxed mb-3">{s.finding}</p>
+                <p className="text-[13px] text-[#006d77] bg-[#00b8a9]/5 px-3 py-2 rounded-lg leading-relaxed">
+                  <strong className="ui-text text-[11px] uppercase tracking-wide text-[#004d54]">Implication: </strong>{s.implication}
+                </p>
+                {s.doi && <a href={s.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[11px] text-[#00b8a9] hover:underline mt-3 inline-block font-medium">View source →</a>}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal delay={600}>
+          <p className="ui-text text-[11px] text-[#9ca3af] italic mt-10 leading-relaxed">Updates ran April 27, 2026. The CHI 2026 timing study was conference-presented April 14, 2026 and is not yet peer-reviewed — cited as a CHI presentation rather than a published paper.</p>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
 function CognitiveIoCs() {
   return (
     <section id="indicators" className="py-28 px-6 bg-[#004d54] relative overflow-hidden">
@@ -436,6 +511,8 @@ function Caveats() {
     'Factor 1 (Kosmyna) rests on N=9 in a preprint sub-analysis',
     'Growth-mode evidence is thinner than decline-mode evidence in this corpus',
     'The framework may need rewriting when longitudinal data on professionals arrives',
+    'Population-scale effects — homogenization of language, perspective, and reasoning across users sparring with the same model — are real and outside this framework’s scope',
+    'Engagement is necessary but not sufficient — heavy AI use produces cognitive fatigue (“brain fry”) even among engaged users; dose still matters',
     'The author sells a PAI Accelerator — conflict of interest disclosed',
   ]
   return (
@@ -718,6 +795,7 @@ export default function App() {
         <Factors />
         <SevenModes />
         <Evidence />
+        <Update2026 />
         <CognitiveIoCs />
         <Curriculum />
         <Caveats />
