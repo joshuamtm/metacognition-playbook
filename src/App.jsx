@@ -19,10 +19,10 @@ const SECTIONS = [
 ]
 
 const FACTORS = [
-  { num: 1, title: 'Skill First, or Tool First?', subtitle: 'Order of Exposure', evidence: 'Kosmyna et al. (MIT, 2025). N=54→18. Brain-to-LLM: engagement spikes. LLM-to-Brain: persistent under-engagement — 7/9 couldn’t quote own essays written minutes earlier.', caveat: '⚠️ N=9 sub-analysis, preprint — load-bearing single study', takeaway: 'For skills you want to own, do the effortful work first, then bring AI in for refinement.', doi: 'https://arxiv.org/abs/2506.08872', stat: '7/9', statLabel: 'couldn’t quote their own essays' },
-  { num: 2, title: 'Do You Know Where AI Is Reliable?', subtitle: 'Frontier Awareness', evidence: 'Dell’Acqua et al. (HBS, 2023). N=758 BCG consultants. Inside frontier: +12.2% productivity. Outside frontier: −19% accuracy. Shaw & Nave (Wharton, 2026). N=1,372. 40pp accuracy swing. Cohen’s h = 0.81.', takeaway: 'Every AI use benefits from: “Is this inside or outside what I can check?”', doi: 'https://ssrn.com/abstract=6097646', stat: '40pp', statLabel: 'accuracy swing from same AI' },
+  { num: 1, title: 'Skill First, or Tool First?', subtitle: 'Order of Exposure', evidence: 'Kosmyna et al. (MIT, 2025). N=54→18. Brain-to-LLM: engagement spikes. LLM-to-Brain: persistent under-engagement — 7/9 couldn’t quote essays they wrote earlier in the same experiment.', caveat: '⚠️ N=9 sub-analysis, preprint — load-bearing single study', takeaway: 'For skills you want to own, do the effortful work first, then bring AI in for refinement.', doi: 'https://arxiv.org/abs/2506.08872', stat: '7/9', statLabel: 'couldn’t quote their own essays' },
+  { num: 2, title: 'Do You Know Where AI Is Reliable?', subtitle: 'Frontier Awareness', evidence: 'Dell’Acqua et al. (HBS, 2023). N=758 BCG consultants. Inside frontier: +12.2% productivity. Outside frontier: −19% accuracy. Shaw & Nave (Wharton, 2026). N=1,372. +25 pp accuracy when AI accurate, −15 pp when AI errs (Study 1). Cohen’s h = 0.81. Confidence held steady regardless of accuracy (β=−1.14, p=0.202).', takeaway: 'Every AI use benefits from: “Is this inside or outside what I can check?”', doi: 'https://ssrn.com/abstract=6097646', stat: '+25/−15', statLabel: 'pp swing from same AI (Study 1)' },
   { num: 3, title: 'Did the Thinking Move, or Disappear?', subtitle: 'Effort Relocation', evidence: 'Lee et al. (Microsoft/CMU, 2025). N=319. Effort relocates upstream/downstream. Barcaui (2025). N=120. 45-day retention: d=0.68 loss. Fan et al. (BJET, 2024). N=117. “Metacognitive laziness” — better essays, no knowledge gain.', takeaway: 'Growth mode relocates effort. Decline mode eliminates it.', stat: 'd=0.68', statLabel: '45-day retention loss' },
-  { num: 4, title: 'Did You Tell AI What Kind of Help You Want?', subtitle: 'Configuration / Mode Contracts', evidence: 'Bastani et al. (PNAS, 2025). ~1,000 students across ~50 classrooms. Same GPT-4, same curriculum. Unguarded: −17% on exam. Guardrailed (hints, not answers): statistically indistinguishable from control. LearnLM (DeepMind, 2025): +5.5pp on novel transfer.', badge: 'Strongest actionable lever in the corpus', takeaway: 'Same model, same students, opposite outcomes — determined by the instructions.', doi: 'https://doi.org/10.1073/pnas.2422633122', stat: '−17%', statLabel: 'exam score, unguarded vs control' },
+  { num: 4, title: 'Did You Tell AI What Kind of Help You Want?', subtitle: 'Configuration / Mode Contracts', evidence: 'Bastani et al. (PNAS, 2025). ~1,000 students across ~50 classrooms. Same GPT-4, same curriculum. Unguarded: −17% on exam. Guardrailed (hints, not answers): statistically indistinguishable from control. LearnLM (DeepMind, 2025): +5.5pp on novel transfer.', badge: 'Strongest structural lever — metacognition is the mechanism, Mode Contracts are the means', takeaway: 'Same model, same students, opposite outcomes — determined by the instructions. Metacognitive calibration is what makes a Mode Contract work; the contract is what makes calibration practicable.', doi: 'https://doi.org/10.1073/pnas.2422633122', stat: '−17%', statLabel: 'exam score, unguarded vs control' },
 ]
 
 const MODE_COLORS = { neutral: '#8b95a5', warning: '#d97706', danger: '#b91c1c', growth: '#047857', conditional: '#0e7490', protected: '#6d28d9' }
@@ -33,16 +33,16 @@ const MODES = [
   { num: 1, name: 'Autopilot', color: 'warning', badge: 'Decline', desc: 'Accept AI output without engaging. Default state for every busy professional. Goal: notice before it bleeds into what matters.', prompt: 'You asked, you got, you used. You didn’t form your own view first.' },
   { num: 2, name: 'Looking Good, Learning Nothing', color: 'danger', badge: 'Hidden Decline', desc: 'Decline disguised as growth. Output looks fine. Skill isn’t building. The bill comes due all at once: you can’t write without the tool, and your voice has started sounding like everybody else’s.', prompt: 'The grant narrative reads well. If AI vanished tomorrow, could you write it?' },
   { num: 3, name: 'Stewardship', color: 'growth', badge: 'Growth', desc: 'You form your view first. AI proposes, you dispose. Effort relocated upstream and downstream. “Doing → stewarding.”', prompt: 'You wrote the shape. AI tightened the sentences. You kept the voice.' },
-  { num: 4, name: 'Sparring Partner', color: 'growth', badge: 'Growth', desc: 'You have a position. You ask AI to challenge it. Position first, critique second. The only feedback type shown to produce transfer learning.', prompt: '“Steelman the opposite view. Find the weakest link in my argument.”' },
+  { num: 4, name: 'Sparring Partner', color: 'growth', badge: 'Growth', desc: 'You have a position. You ask AI to challenge it. Position first, critique second. Among the feedback patterns most consistently associated with transfer learning in the corpus.', prompt: '“Steelman the opposite view. Find the weakest link in my argument.”' },
   { num: 5, name: 'Co-Pilot', color: 'conditional', badge: 'Conditional', desc: 'AI removes friction so you focus on judgment. Works when you have evaluative capacity. May flatten voice for high-skill writers.', prompt: 'AI generates six openings; you pick the one with the right tone and rewrite paragraph two.' },
   { num: 6, name: 'Good Enough on Purpose', color: 'neutral', badge: 'Declared', desc: 'Conscious bounded delegation. Observable only via speech act: “I’m using AI for X. Not trying to learn this. I’ll spot-check Y. Budget Z minutes.”', prompt: 'If you didn’t say the sentence, you were in Mode 1.' },
   { num: 7, name: 'Hands Off', color: 'protected', badge: 'Protected', desc: 'Work you keep AI out of on purpose. Not because AI can’t — because doing it yourself IS the point.', prompt: '“This one is mine.”' },
 ]
 
 const STUDIES = [
-  { tier: 1, title: 'Cognitive Debt (EEG)', authors: 'Kosmyna et al.', venue: 'MIT Media Lab', year: 2025, n: '54→18', finding: 'LLM users: weakest brain connectivity. LLM-to-Brain participants couldn’t quote own essays (1/9 vs 7/9).', stars: 5, doi: 'https://arxiv.org/abs/2506.08872' },
-  { tier: 1, title: 'Cognitive Surrender', authors: 'Shaw & Nave', venue: 'Wharton / SSRN', year: 2026, n: '1,372', finding: '40pp accuracy swing from same AI. Cohen’s h=0.81. Confidence did NOT drop when wrong.', stars: 5, doi: 'https://ssrn.com/abstract=6097646' },
-  { tier: 1, title: 'Critical Thinking Impact', authors: 'Lee et al.', venue: 'Microsoft / CMU', year: 2025, n: '319', finding: 'GenAI confidence → less thinking (β=−0.69). Self-confidence → more (+0.31). Effort shifts, doesn’t vanish.', stars: 5 },
+  { tier: 1, title: 'Cognitive Debt (EEG)', authors: 'Kosmyna et al.', venue: 'MIT Media Lab', year: 2025, n: '54→18', finding: 'LLM users: weakest brain connectivity. LLM-to-Brain participants couldn’t quote essays they wrote earlier in the same experiment (1/9 vs 7/9).', stars: 5, doi: 'https://arxiv.org/abs/2506.08872' },
+  { tier: 1, title: 'Cognitive Surrender', authors: 'Shaw & Nave', venue: 'Wharton / SSRN', year: 2026, n: '1,372', finding: '+25 pp accuracy when AI accurate, −15 pp when AI errs (Study 1). Cohen’s h=0.81. Confidence held steady regardless of accuracy (β=−1.14, p=0.202).', stars: 5, doi: 'https://ssrn.com/abstract=6097646' },
+  { tier: 1, title: 'Critical Thinking Impact', authors: 'Lee, H. et al.', venue: 'Microsoft / CMU', year: 2025, n: '319', finding: 'GenAI confidence → less thinking (β=−0.69). Self-confidence → more (+0.31). Effort shifts, doesn’t vanish.', stars: 5 },
   { tier: 1, title: 'Without Guardrails', authors: 'Bastani et al.', venue: 'PNAS', year: 2025, n: '~1,000', finding: 'Same GPT-4: −17% unguarded. 0% guardrailed. Configuration > willpower.', stars: 5, doi: 'https://doi.org/10.1073/pnas.2422633122' },
   { tier: 1, title: 'Creativity vs. Diversity', authors: 'Doshi & Hauser', venue: 'Science Advances', year: 2024, n: '293+600', finding: 'Low-skill: +22% quality. High-skill: no gain + voice flattening toward model prior.', stars: 5, doi: 'https://doi.org/10.1126/sciadv.adn5290' },
   { tier: 1, title: 'Metacognitive Laziness', authors: 'Fan et al.', venue: 'BJET', year: 2024, n: '117', finding: 'Better essays, NO knowledge gain. AI removes disfluency that triggers System 2 monitoring.', stars: 5, doi: 'https://doi.org/10.1111/bjet.13544' },
@@ -51,10 +51,9 @@ const STUDIES = [
   { tier: 2, title: 'Jagged Frontier', authors: 'Dell’Acqua et al.', venue: 'HBS', year: 2023, n: '758', finding: '+12% in-frontier, −19% out-of-frontier. BCG field experiment.', stars: 5 },
   { tier: 2, title: 'Political Persuasion', authors: 'Hackenburg et al.', venue: 'Science', year: 2025, n: '76,977', finding: 'Persuasion +51% but accuracy drops. Trade-off is structural, not accidental.', stars: 5, doi: 'https://doi.org/10.1126/science.aea3884' },
   { tier: 2, title: 'LearnLM Tutoring', authors: 'DeepMind / Eedi', venue: 'Tech Report', year: 2025, n: '165', finding: '+5.5pp novel transfer. Pedagogical AI + human supervision = growth.', stars: 5 },
-  { tier: 2, title: 'Cognitive Crutch', authors: 'Barcaui', venue: 'SSH Open', year: 2025, n: '120', finding: '45-day delayed retention: 57.5% vs 68.5%. d=0.68.', stars: 5 },
+  { tier: 2, title: 'Cognitive Crutch', authors: 'Barcaui', venue: 'Social Sciences & Humanities Open (Elsevier)', year: 2025, n: '120', finding: '45-day delayed retention: 57.5% vs 68.5%. d=0.68.', stars: 5 },
   { tier: 2, title: 'Tutor CoPilot', authors: 'Wang et al.', venue: 'Stanford', year: 2025, n: '2,700', finding: '+4pp mastery overall; +9pp for lowest-rated tutors. $20/tutor/year.', stars: 4 },
   { tier: 2, title: 'AI vs. Active Learning', authors: 'Kestin et al.', venue: 'Harvard / Sci. Rep.', year: 2024, n: '—', finding: 'Purpose-built AI tutor beats in-class active learning on physics.', stars: 4 },
-  { tier: 2, title: 'Meta-analysis (51 studies)', authors: 'Wang & Fan', venue: 'Nature Portfolio', year: 2025, n: '51 studies', finding: 'g=0.867 on learning performance. Conditional on scaffolding.', stars: 4 },
   { tier: 2, title: 'Psychosocial Effects', authors: 'Fang et al.', venue: 'MIT / OpenAI', year: 2025, n: '981', finding: 'Dose + disposition drive harm, not modality. 4-week longitudinal RCT.', stars: 5 },
   { tier: 2, title: 'Children fMRI', authors: 'Horowitz-Kraus et al.', venue: 'bioRxiv', year: 2025, n: '31', finding: 'Children: lower frontoparietal connectivity during AI co-creation vs adults.', stars: 4 },
   { tier: 2, title: 'How Americans View AI', authors: 'Pew Research', venue: 'Pew', year: 2025, n: '5,023', finding: '53% say AI will worsen creative thinking. 50% say worse for relationships.', stars: 4, doi: 'https://www.pewresearch.org/science/2025/09/17/how-americans-view-ai-and-its-impact-on-people-and-society/' },
@@ -65,10 +64,10 @@ const STUDIES = [
 
 /* New studies added in April 2026 update — published or surfaced after the original synthesis. */
 const STUDIES_2026 = [
-  { title: 'Explanation Gate (RCT)', authors: 'Gerber et al.', venue: 'ACM L@S ’26', year: 2026, n: '78', finding: 'Forcing users to explain AI-generated code in their own words before accepting it cut failure on a subsequent AI-blackout task from 77% to 39% — a 38.4 percentage-point gap from a single structural forcing function. Strongest empirical demonstration of the engaged/outsourced divide in 2026.', implication: 'Confirms Mode 4 Stewardship and Mode 5 Sparring Partner are not just heuristics — even minimal forced engagement produces transfer.', doi: 'https://arxiv.org/abs/2602.20206' },
-  { title: 'AI Timing & Critical Thinking', authors: 'CHI 2026 (Lee et al.)', venue: 'CHI ’26, Barcelona', year: 2026, n: '393', finding: 'Participants who delayed AI access until after partial independent problem-solving outperformed AI-first users on critical thinking tasks. Active engagement from minute one was nearly as harmful as passive use — because users adopted the AI’s framing before forming their own.', implication: 'New principle the original framework didn’t fully address: form your own view first, then spar. Active engagement is necessary but not sufficient.', doi: 'https://www.sciencenews.org/article/ai-timing-critical-thinking-study' },
+  { title: 'Explanation Gate (RCT)', authors: 'Sankaranarayanan', venue: 'arXiv preprint (intended for ACM L@S ’26)', year: 2026, n: '78', finding: 'Forcing users to explain AI-generated code in their own words before accepting it cut failure on a subsequent AI-blackout task from 77% to 39% — a 38 percentage-point gap from a single structural forcing function. Strongest empirical demonstration of the engaged/outsourced divide in 2026.', implication: 'Confirms Mode 4 Stewardship and Mode 5 Sparring Partner are not just heuristics — even minimal forced engagement produces transfer.', doi: 'https://arxiv.org/abs/2602.20206' },
+  { title: 'AI Timing & Critical Thinking', authors: 'Lee, M. et al.', venue: 'CHI ’26, Barcelona (conference presentation)', year: 2026, n: '393', finding: 'Participants who delayed AI access until after partial independent problem-solving outperformed AI-first users on critical thinking tasks. With sufficient time, the late-AI group preserved more independent reasoning. Under time pressure, early-AI access boosted output quality but reduced critical thinking — a speed/cognition tradeoff.', implication: 'New principle the original framework didn’t fully address: form your own view first, then spar. Timing of engagement matters as much as quality of engagement.', doi: 'https://www.sciencenews.org/article/ai-timing-critical-thinking-study' },
   { title: 'Outsourcing Thinking to AI?', authors: 'Tian & Zhang', venue: 'Humanities & Social Sciences Communications (Nature portfolio)', year: 2026, n: '698', finding: 'Same variable — perceived AI intelligence — simultaneously predicts focused immersion (positive pathway) and AI dependency (negative pathway). The mechanism is double-edged: the same engagement that protects can produce dependency in different users.', implication: 'Refines Factor 4 (Configuration). Disposition and individual differences moderate engagement’s protective effect.', doi: 'https://www.nature.com/articles/s41599-026-07153-8' },
-  { title: 'Cognitive Offloading in Schools', authors: 'Loble & Lodge', venue: 'UTS / UQ Synthesis', year: 2026, n: '~1,000', finding: 'High-school math RCT: AI raised scores while present, performance collapsed when AI was removed — gains didn’t transfer. Names the useful distinction between offloading extraneous cognitive load (safe) vs. intrinsic load — the struggle that builds schema (harmful when outsourced).', implication: 'Sharpens Mode 7 Hands Off. Helps answer the practical question: when is offloading safe?', doi: 'https://www.uts.edu.au/news/2026/03/experts-warn-unstructured-ai-use-in-schools-risks-cognitive-atrophy' },
+  { title: 'Cognitive Offloading in Schools', authors: 'Loble & Lodge', venue: 'UTS / UQ Evidence Synthesis (not a primary RCT)', year: 2026, n: '—', finding: 'Synthesis of multiple studies including high-school math research showing students who used AI scored higher while AI was present but performance collapsed when AI was removed. Names the useful distinction between offloading extraneous cognitive load (safe) vs. intrinsic load — the struggle that builds schema (harmful when outsourced).', implication: 'Sharpens Mode 7 Hands Off. Helps answer the practical question: when is offloading safe?', doi: 'https://www.uts.edu.au/news/2026/03/experts-warn-unstructured-ai-use-in-schools-risks-cognitive-atrophy' },
   { title: 'Brain Fry from AI Volume', authors: 'Bedard et al.', venue: 'HBR', year: 2026, n: '~1,500', finding: 'Heavy AI users — even engaged ones — reported cognitive fatigue: mental fog, slower decision-making, headaches. Different mechanism from outsourcing: the volume and pace of AI-mediated cognitive work exceeded human processing capacity.', implication: 'Counter-evidence to a strict engagement-protects-you reading. Engagement is necessary; dose still matters. Self-report only — lower confidence than the others.', doi: 'https://hbr.org/2026/03/when-using-ai-leads-to-brain-fry' },
   { title: 'Homogenizing Effect of LLMs', authors: 'Sourati et al.', venue: 'Trends in Cognitive Sciences', year: 2026, n: '—', finding: 'Population-scale theoretical synthesis: LLMs standardize language, perspective, and reasoning, favoring linear chain-of-thought over intuitive and abstract modes. A population of engaged sparring users may still converge if all sparring with the same model.', implication: 'New dimension this framework doesn’t address: collective cognitive effects independent of individual engagement quality.', doi: 'https://www.cell.com/trends/cognitive-sciences/fulltext/S1364-6613(26)00003-3' },
 ]
@@ -166,7 +165,7 @@ function Hero() {
         <Reveal delay={120}><h1 className="text-[clamp(2.5rem,7vw,4.5rem)] leading-[1.05] text-[#004d54] mb-5">The Metacognition<br/>Playbook</h1></Reveal>
         <Reveal delay={240}><p className="ui-text text-[17px] text-[#6b7280] font-light tracking-wide mb-2">A Working Model for Deliberate AI Use</p></Reveal>
         <Reveal delay={320}><p className="ui-text text-[13px] text-[#9ca3af] mb-10">Joshua Peskay · April 2026</p></Reveal>
-        <Reveal delay={400}><p className="text-[18px] text-[#2d2d3f]/75 leading-relaxed max-w-lg mx-auto mb-14">A meta-analysis of 31 studies on how AI changes the way we think — and what to do about it.</p></Reveal>
+        <Reveal delay={400}><p className="text-[18px] text-[#2d2d3f]/75 leading-relaxed max-w-lg mx-auto mb-14">A working synthesis of 36 studies on how AI changes the way we think — and what to do about it.</p></Reveal>
         <Reveal delay={500}>
           <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#004d54] hover:text-white hover:border-[#004d54] transition-all duration-300 group">
             Read the report
@@ -195,7 +194,7 @@ function TheQuestion() {
             <p className="text-[16px] leading-[1.7] text-white/85">Cognitive outcomes depend less on AI exposure than on four design variables, with metacognitive calibration as the master moderator.</p>
           </div>
         </Reveal>
-        <Reveal delay={340}><p className="text-[17px] leading-[1.75] text-[#2d2d3f]/70">In plain English: it is not whether you use AI. It is not even how much. It is whether, in each interaction, you can answer two questions honestly.</p></Reveal>
+        <Reveal delay={340}><p className="text-[17px] leading-[1.75] text-[#2d2d3f]/70">In plain English: it is not just whether you use AI, or only how often — it is the <em>mode</em> you are in each time. Frequency still matters (heavy use produces fatigue even among engaged users), but mode is the variable you can change deliberately. The framework is built around two questions you can answer honestly in each interaction.</p></Reveal>
       </div>
     </section>
   )
@@ -226,7 +225,7 @@ function TwoQuestions() {
               <div className="relative bg-white/[0.06] backdrop-blur-sm rounded-2xl p-9 border border-white/[0.08]">
                 <div className="ui-text text-[#00b8a9]/60 text-[64px] font-black leading-none mb-5" style={{ fontFamily: 'var(--font-display)' }}>2</div>
                 <p className="text-[20px] text-white leading-snug mb-5" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>If the AI is wrong here, <span className="text-[#00b8a9]">will I catch it?</span></p>
-                <p className="text-[14px] text-white/45 leading-relaxed">In a 1,372-person study, the same AI produced a 40-point accuracy swing — and users’ confidence did <em>not</em> drop when they were wrong.</p>
+                <p className="text-[14px] text-white/45 leading-relaxed">In a 1,372-person study, the same AI raised participants’ accuracy by 25 points when it was right and dropped it by 15 when it was wrong (Study 1) — yet users’ confidence stayed steady regardless.</p>
               </div>
             </div>
           </Reveal>
@@ -261,7 +260,7 @@ function Factors() {
               <p className="ui-text text-[11px] font-semibold text-[#00b8a9]/70 tracking-[0.15em] uppercase mb-3">Master Moderator</p>
               <h3 className="text-[clamp(1.2rem,3vw,1.6rem)] text-white mb-4" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>Can You Still Tell When It’s Wrong?</h3>
               <p className="text-[15px] text-white/75 leading-relaxed mb-3 max-w-2xl">Confidence did NOT decline when participants were wrong alongside AI (Shaw & Nave, β=−1.14, p=0.202). The calibration loop was severed.</p>
-              <p className="text-[14px] text-white/50 leading-relaxed max-w-2xl">Metacognition is a demand, not an intervention. It needs environmental scaffolding — Mode Contracts, verification rituals, peer review — to be sustainable.</p>
+              <p className="text-[14px] text-white/50 leading-relaxed max-w-2xl">Metacognition is a demand, not an intervention. It needs environmental scaffolding — Mode Contracts, verification rituals, peer review — to be sustainable. The relationship is complementary, not competing: metacognition is the underlying mechanism that makes AI use grow (or erode) cognition; Mode Contracts (Factor 4) are the strongest <em>structural</em> means of activating that mechanism reliably.</p>
             </div>
           </div>
         </Reveal>
@@ -310,7 +309,9 @@ function SevenModes() {
       <div className="max-w-4xl mx-auto">
         <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Patterns</p></Reveal>
         <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Seven Modes of AI Use</h2></Reveal>
-        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-12 max-w-xl">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-3 max-w-xl">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p></Reveal>
+        <Reveal delay={130}><p className="text-[14px] text-[#9ca3af] italic mb-3 max-w-xl">A note on counting: Mode 0 (Lookup) is a baseline condition rather than one of the seven modes — it sits outside the cognitive-stakes spectrum because nothing is being formed or eroded. The seven modes start at Mode 1 (Autopilot). Many readers will use Mode 0 dozens of times a day without it being part of the framework's cognitive-impact picture, and that's the right read.</p></Reveal>
+        <Reveal delay={150}><p className="text-[14px] text-[#9ca3af] italic mb-12 max-w-xl">A note on confidence: the decline-mode evidence (Modes 1 and 2) is stronger than the growth-mode evidence (Modes 3 and 4) in the corpus. Both kinds of mode are real, but the studies showing harm from passive use are larger and more replicated than those showing gains from sparring or stewardship. Read the badges accordingly: growth modes are well-supported but the case for them is still building.</p></Reveal>
         <div className="grid gap-4">
           {MODES.map((m, i) => (
             <Reveal key={m.num} delay={140 + i * 60}>
@@ -346,7 +347,7 @@ function Evidence() {
       <div className="max-w-5xl mx-auto">
         <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Research</p></Reveal>
         <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Evidence Base</h2></Reveal>
-        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-12">31 studies. 8 anchor papers deep-read. 23 supporting studies skim-extracted.</p></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-12">30 studies in the original synthesis (1 since retracted, removed) + 6 added in the April 2026 update = 36 active. 8 anchor papers deep-read; the rest skim-extracted.</p></Reveal>
 
         <Reveal delay={140}><h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.15em] uppercase mb-5">Tier 1 — Anchor Papers</h3></Reveal>
         <div className="grid sm:grid-cols-2 gap-4 mb-14">
@@ -593,14 +594,14 @@ function Purpose() {
         <Reveal delay={140}>
           <div className="space-y-5 text-[16px] leading-[1.8] text-[#2d2d3f]/75">
             <p>There is a growing body of research on what happens to human cognition when we work alongside AI. Most of it lives behind academic paywalls, scattered across neuroscience, education, behavioral economics, and computer science journals. Very little of it has been synthesized for the people who need it most: professionals making daily decisions about how to use AI in their work.</p>
-            <p>This report assembles 31 studies into a single working model. It is written for <strong className="text-[#004d54] font-semibold">nonprofit professionals, knowledge workers, and anyone building a Personal AI</strong> who wants to understand what the research actually says about the difference between AI use that makes you sharper and AI use that makes you softer.</p>
+            <p>This report assembles 36 studies (30 from the original synthesis plus 6 added in the April 2026 update) into a single working model. It is written for <strong className="text-[#004d54] font-semibold">nonprofit professionals, knowledge workers, and anyone building a Personal AI</strong> who wants to understand what the research actually says about the difference between AI use that makes you sharper and AI use that makes you softer.</p>
             <p>It was produced by <strong className="text-[#004d54] font-semibold">Meet the Moment (MTM)</strong> as the evidence base for our PAI Accelerator curriculum and as a contribution to the broader conversation about deliberate, ethical AI adoption. The framework, the caveats, and the conflict-of-interest disclosure are all intentional. We believe the sector deserves research-grounded guidance delivered with intellectual honesty.</p>
           </div>
         </Reveal>
         <Reveal delay={200}>
           <div className="mt-10 grid sm:grid-cols-3 gap-4">
             {[
-              { num: '31', label: 'studies reviewed' },
+              { num: '36', label: 'studies reviewed' },
               { num: '8', label: 'anchor papers deep-read' },
               { num: '4', label: 'audience personas validated' },
             ].map((s, i) => (
@@ -701,9 +702,9 @@ const EXPLORE_PATHS = [
   {
     icon: '🔬',
     title: 'I want to see the research',
-    desc: 'Browse the 31 studies — 8 anchor papers deep-read, 23 supporting studies skim-extracted — with effect sizes, sample sizes, and source links.',
+    desc: 'Browse 36 studies — 8 anchor papers deep-read, the rest skim-extracted — with effect sizes, sample sizes, and source links. Plus the April 2026 update with 6 new findings.',
     links: [
-      { label: 'Evidence Base (31 studies)', href: '#evidence' },
+      { label: 'Evidence Base (36 studies)', href: '#evidence' },
       { label: 'Four Design Factors', href: '#factors' },
       { label: 'Epistemic Caveats', href: '#caveats' },
     ],
