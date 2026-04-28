@@ -188,7 +188,7 @@ function Hero() {
         <Reveal delay={400}><p className="text-[18px] text-[#2d2d3f]/75 leading-relaxed max-w-lg mx-auto mb-14">A working synthesis of 36 studies on how AI changes the way we think — and what to do about it.</p></Reveal>
         <Reveal delay={500}>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#004d54] hover:text-white hover:border-[#004d54] transition-all duration-300 group">
+            <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#003940] hover:text-white hover:border-[#003940] transition-all duration-300 group">
               Read the report
               <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
             </a>
@@ -295,7 +295,20 @@ function Factors() {
         <div className="grid gap-5">
           {FACTORS.map((f, i) => (
             <Reveal key={f.num} delay={180 + i * 80}>
-              <div onClick={() => setExpanded(expanded === f.num ? null : f.num)} className="cursor-pointer bg-white rounded-xl border border-[#004d54]/8 hover:border-[#00b8a9]/25 transition-all duration-300 card-lift overflow-hidden">
+              <article
+                onClick={() => setExpanded(expanded === f.num ? null : f.num)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setExpanded(expanded === f.num ? null : f.num)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={expanded === f.num}
+                aria-controls={`factor-${f.num}-detail`}
+                className="cursor-pointer bg-white rounded-xl border border-[#004d54]/8 hover:border-[#00b8a9]/25 transition-all duration-300 card-lift overflow-hidden"
+              >
                 <div className="p-6 sm:p-7">
                   <div className="flex items-start gap-5">
                     <div className="shrink-0 text-center">
@@ -314,14 +327,14 @@ function Factors() {
                     <svg className={`w-5 h-5 text-[#9ca3af] shrink-0 transition-transform duration-300 ${expanded === f.num ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                   {expanded === f.num && (
-                    <div className="mt-5 pt-5 border-t border-[#004d54]/5 ml-[52px]">
+                    <div id={`factor-${f.num}-detail`} className="mt-5 pt-5 border-t border-[#004d54]/5 ml-[52px]">
                       <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed mb-3"><strong className="ui-text text-[#004d54] font-semibold text-[12px] uppercase tracking-wide">Evidence: </strong>{f.evidence}</p>
                       {f.caveat && <p className="ui-text text-[11px] text-[#d97706] bg-[#d97706]/8 px-3 py-2 rounded-lg inline-block mt-2">{f.caveat}</p>}
                       {f.doi && <a href={f.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[11px] text-[#00b8a9] hover:underline block mt-3 font-medium">View source →</a>}
                     </div>
                   )}
                 </div>
-              </div>
+              </article>
             </Reveal>
           ))}
         </div>
@@ -352,7 +365,7 @@ function SevenModes() {
         <div className="grid gap-4">
           {MODES.map((m, i) => (
             <Reveal key={m.num} delay={140 + i * 60}>
-              <div className="rounded-xl overflow-hidden card-lift" style={{ background: MODE_BG[m.color] }}>
+              <article className="rounded-xl overflow-hidden card-lift" style={{ background: MODE_BG[m.color] }}>
                 <div className="flex items-stretch">
                   <div className="w-1.5 shrink-0" style={{ background: MODE_COLORS[m.color] }} />
                   <div className="p-5 sm:p-6 flex items-start gap-5 flex-1">
@@ -363,11 +376,11 @@ function SevenModes() {
                         <span className="badge text-[9px] font-semibold px-2 py-[3px] rounded-full uppercase tracking-wider" style={{ background: `${MODE_COLORS[m.color]}15`, color: MODE_COLORS[m.color] }}>{m.badge}</span>
                       </div>
                       <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed">{m.desc}</p>
-                      <p className="text-[13px] italic text-[#9ca3af] mt-2.5 leading-relaxed">{m.prompt}</p>
+                      <p className="text-[13px] italic text-[#6b7280] mt-2.5 leading-relaxed">{m.prompt}</p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             </Reveal>
           ))}
         </div>

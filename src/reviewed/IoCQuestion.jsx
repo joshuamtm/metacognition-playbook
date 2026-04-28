@@ -1,10 +1,26 @@
 /* IoC multi-select with tooltips. Item 8. */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { IOCS, IOC_NONE } from './iocs.js'
 
 export default function IoCQuestion({ value, onChange, onNext, onBack }) {
   const [tooltipOpen, setTooltipOpen] = useState(null)
+  const tooltipRefs = useRef({})
   const selected = value || []
+
+  /* Outside-click dismissal for the floating tooltip panel */
+  useEffect(() => {
+    if (!tooltipOpen) return
+    const onDocClick = (e) => {
+      const node = tooltipRefs.current[tooltipOpen]
+      if (node && !node.contains(e.target)) setTooltipOpen(null)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    document.addEventListener('touchstart', onDocClick)
+    return () => {
+      document.removeEventListener('mousedown', onDocClick)
+      document.removeEventListener('touchstart', onDocClick)
+    }
+  }, [tooltipOpen])
 
   const toggle = (id) => {
     if (id === 'none') {
@@ -38,10 +54,12 @@ export default function IoCQuestion({ value, onChange, onNext, onBack }) {
         <div className="space-y-3">
           {IOCS.map((ioc) => {
             const isSelected = selected.includes(ioc.id)
+            const isOpen = tooltipOpen === ioc.id
             return (
-              <div key={ioc.id} className="relative">
+              <div key={ioc.id} className="relative" ref={(el) => (tooltipRefs.current[ioc.id] = el)}>
                 <button
                   onClick={() => toggle(ioc.id)}
+                  aria-pressed={isSelected}
                   className={`w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-start gap-3 ${
                     isSelected
                       ? 'bg-[#004d54] border-[#004d54] text-white'
@@ -49,44 +67,63 @@ export default function IoCQuestion({ value, onChange, onNext, onBack }) {
                   }`}
                 >
                   <span
-                    className={`shrink-0 w-5 h-5 rounded border-2 mt-0.5 flex items-center justify-center transition-colors ${
+                    className={`shrink-0 w-6 h-6 rounded border-2 mt-px flex items-center justify-center transition-colors ${
                       isSelected
                         ? 'bg-white border-white'
                         : 'border-[#004d54]/30'
                     }`}
                   >
                     {isSelected && (
-                      <svg className="w-3.5 h-3.5 text-[#004d54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[#004d54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </span>
                   <span className="text-[15px] leading-[1.45] flex-1">{ioc.label}</span>
                   <span
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation()
-                      setTooltipOpen(tooltipOpen === ioc.id ? null : ioc.id)
+                      setTooltipOpen(isOpen ? null : ioc.id)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setTooltipOpen(isOpen ? null : ioc.id)
+                      }
                     }}
                     onMouseEnter={() => setTooltipOpen(ioc.id)}
-                    onMouseLeave={() => setTooltipOpen(null)}
-                    className={`shrink-0 w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center cursor-help transition-colors ${
+                    className={`shrink-0 w-6 h-6 rounded-full text-[12px] font-bold flex items-center justify-center cursor-help transition-colors ${
                       isSelected
                         ? 'bg-white/20 text-white hover:bg-white/40'
                         : 'bg-[#004d54]/10 text-[#004d54] hover:bg-[#004d54]/20'
                     }`}
-                    aria-label={`What is ${ioc.name}`}
+                    aria-label={`What is ${ioc.name}? Click for details.`}
+                    aria-expanded={isOpen}
                   >
                     ?
                   </span>
                 </button>
-                {tooltipOpen === ioc.id && (
-                  <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-[#004d54]/20 rounded-xl shadow-lg px-5 py-4">
-                    <p className="ui-text text-[10px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-2">
+                {isOpen && (
+                  <div
+                    className="absolute left-0 right-0 top-full mt-2 z-30 bg-white border border-[#004d54]/20 rounded-xl shadow-lg px-5 py-4"
+                    onMouseLeave={() => setTooltipOpen(null)}
+                  >
+                    <button
+                      onClick={() => setTooltipOpen(null)}
+                      aria-label="Close tooltip"
+                      className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full hover:bg-[#004d54]/10 flex items-center justify-center text-[#6b7280] hover:text-[#004d54] transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    <p className="ui-text text-[10px] font-bold text-[#004d54] tracking-[0.1em] uppercase mb-2 pr-8">
                       {ioc.name}
                     </p>
-                    <p className="text-[13px] leading-[1.55] text-[#2d2d3f]/80">
-                      {ioc.tooltip}
-                    </p>
+                    <p className="text-[13px] leading-[1.55] text-[#2d2d3f]/80">{ioc.tooltip}</p>
                   </div>
                 )}
               </div>
@@ -96,6 +133,7 @@ export default function IoCQuestion({ value, onChange, onNext, onBack }) {
           <div className="pt-2">
             <button
               onClick={() => toggle('none')}
+              aria-pressed={selected.includes('none')}
               className={`w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-start gap-3 ${
                 selected.includes('none')
                   ? 'bg-[#004d54] border-[#004d54] text-white'
@@ -103,12 +141,12 @@ export default function IoCQuestion({ value, onChange, onNext, onBack }) {
               }`}
             >
               <span
-                className={`shrink-0 w-5 h-5 rounded border-2 mt-0.5 flex items-center justify-center transition-colors ${
+                className={`shrink-0 w-6 h-6 rounded border-2 mt-px flex items-center justify-center transition-colors ${
                   selected.includes('none') ? 'bg-white border-white' : 'border-[#004d54]/30'
                 }`}
               >
                 {selected.includes('none') && (
-                  <svg className="w-3.5 h-3.5 text-[#004d54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[#004d54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
