@@ -2,6 +2,7 @@
 import { DOMAINS, MODE_LABELS, MODE_TIERS } from './items.js'
 import { IOCS } from './iocs.js'
 import FormattedText from './FormattedText.jsx'
+import HandThisPrompt from '../HandThisPrompt.jsx'
 import {
   scoreAnswers,
   leanBand,
@@ -476,6 +477,7 @@ export default function Results({ answers, onRetake }) {
       <IoCFlags answers={answers} />
       {positiveCallout && <PositiveCallout callout={positiveCallout} />}
       <Experiments recs={recs} />
+      <HandThisPrompt background="cream" anchor="hand-this-prompt-results" />
       <Caveats />
       <PairWith />
       <Footer onRetake={onRetake} />

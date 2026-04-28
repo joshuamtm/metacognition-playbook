@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import HandThisPrompt from './HandThisPrompt.jsx'
 
 /* ─── Data ─── */
 const SECTIONS = [
@@ -13,6 +14,7 @@ const SECTIONS = [
   { id: 'evidence', label: 'Evidence Base', short: 'Evidence' },
   { id: 'update-2026', label: 'April 2026 Update', short: 'Update' },
   { id: 'indicators', label: 'Cognitive IoCs', short: 'IoCs' },
+  { id: 'hand-this-prompt', label: 'Hand To Your AI', short: 'Prompt' },
   { id: 'caveats', label: 'Caveats', short: 'Caveats' },
 ]
 
@@ -780,6 +782,7 @@ export default function Report() {
         <Evidence />
         <Update2026 />
         <CognitiveIoCs />
+        <HandThisPrompt background="warm" anchor="hand-this-prompt" />
         <Caveats />
       </main>
       <Footer />
