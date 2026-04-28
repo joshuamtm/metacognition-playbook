@@ -14,15 +14,10 @@ export const SEVERITY = { HIGH: 4, 'MEDIUM-HIGH': 3, MEDIUM: 2, MAINTENANCE: 1 }
 /* Helpers used in trigger conditions */
 const iocCount = (a) => (a.iocs ? a.iocs.length : 0)
 const matrixHas = (a, mode) => Object.values(a.matrix || {}).includes(mode)
-const matrixHasModeInDomain = (a, mode, domainId) => (a.matrix?.[domainId] || null) === mode
 const matrixDomainsWithMode = (a, mode) =>
   Object.entries(a.matrix || {})
-    .filter(([_, m]) => m === mode)
-    .map(([d]) => d)
-const matrixHasMode1InCritical = (a) =>
-  DOMAINS.filter((d) => d.critical).some(
-    (d) => a.matrix?.[d.id] === 'M1' || a.matrix?.[d.id] === 'M5_BORDER'
-  )
+    .filter((entry) => entry[1] === mode)
+    .map((entry) => entry[0])
 const allItem1Strong = (a) => a.item1 === 'yes' || a.item1 === 'partly'
 const allItem2Strong = (a) => a.item2 === 'very' || a.item2 === 'fairly'
 

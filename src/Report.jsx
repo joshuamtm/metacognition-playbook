@@ -167,10 +167,17 @@ function Hero() {
         <Reveal delay={320}><p className="ui-text text-[13px] text-[#9ca3af] mb-10">Joshua Peskay · April 2026</p></Reveal>
         <Reveal delay={400}><p className="text-[18px] text-[#2d2d3f]/75 leading-relaxed max-w-lg mx-auto mb-14">A working synthesis of 36 studies on how AI changes the way we think — and what to do about it.</p></Reveal>
         <Reveal delay={500}>
-          <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#004d54] hover:text-white hover:border-[#004d54] transition-all duration-300 group">
-            Read the report
-            <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a href="#question" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-[#004d54] border border-[#004d54]/15 rounded-full px-7 py-3 hover:bg-[#004d54] hover:text-white hover:border-[#004d54] transition-all duration-300 group">
+              Read the report
+              <svg className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </a>
+            <a href="/reviewed" className="inline-flex items-center gap-2 ui-text text-[13px] font-medium text-white bg-[#004d54] border border-[#004d54] rounded-full px-7 py-3 hover:bg-[#00b8a9] hover:border-[#00b8a9] transition-all duration-300 group">
+              Take the assessment
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </div>
+          <p className="ui-text text-[11px] text-[#9ca3af] tracking-wide mt-4">5–7 minutes · companion to the report · no data collected</p>
         </Reveal>
       </div>
     </section>
