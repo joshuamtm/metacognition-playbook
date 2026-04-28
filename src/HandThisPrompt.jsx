@@ -20,6 +20,13 @@ THE SEVEN MODES OF AI USE
 - Mode 6, Good Enough on Purpose: Conscious bounded delegation, declared up front.
 - Mode 7, Hands Off: Work I keep you out of by choice. Protected.
 
+DISTINGUISHING ADJACENT MODES (precision matters; pick one)
+- Mode 1 vs Mode 2: Mode 1 = no engagement at all. Mode 2 = polished output, but I cannot reproduce or explain it later. The diagnostic test for Mode 2: could I, without your help, reconstruct the central argument or analysis? If no, it was Mode 2.
+- Mode 1 vs Mode 5/M1-border: Mode 1 = no review at all. Mode 5/M1-border = light edit only, no structural change. If I made any substantive modification, it is M5 territory; if I only sent it as-is or made trivial typo fixes, it is M1.
+- Mode 3 vs Mode 5: Mode 3 = I formed the analytical structure first, you refined language. Mode 5 = you produced the structure, I judged it. Where did the analytical thinking originate?
+- Mode 4 vs Mode 5: Mode 4 = I had a position and asked you to challenge it. Mode 5 = you drafted and I evaluated. Mode 4 is sparring; Mode 5 is editing.
+- Mode 6 vs Mode 1: Mode 6 requires an explicit speech-act declaration up front ("I'm using this for X, not learning, will spot-check Y"). Without that declaration, low-engagement use is Mode 1, not Mode 6 — even if the user feels they are being deliberate.
+
 EIGHT INDICATORS OF COMPROMISE
 Watch for: uncharacteristic agreement (accepting where I would normally push back), compressed curiosity (stopping at the first answer), context drift (letting you redefine my question), false familiarity (feeling I understand from your summary alone), judgment delegation (outsourcing a call that should be mine), confidence inflation (feeling more certain than my evidence warrants), verification fatigue (defaulting to acceptance because checking is tiring), phrase contamination (my writing starting to sound like yours).
 
@@ -27,23 +34,25 @@ WHAT I WANT FROM YOU
 
 Look at our recent interactions. Use whatever history you have access to: this current session, your memory, projects, chat history, indexed documents. Tell me:
 
-1. Top one or two modes I tend to operate in with you. Cite specific recent interactions as evidence. If you do not have enough history to answer, say so explicitly.
+1. Top one or two modes I tend to operate in with you. Use the adjacent-mode distinctions above to pick precisely. Cite specific recent interactions as evidence. If you have fewer than ~10 substantive interactions to draw from, do not assert a dominant mode at all — state explicitly that the history is too thin for a confident call, and recommend I re-take this assessment after 4–6 weeks of additional interaction.
 
-2. Which of the eight indicators you have noticed in my behavior. Cite a specific moment for each. If you do not have evidence, do not invent any.
+2. Which of the eight indicators you have noticed in my behavior. Cite a specific moment for each. If you do not have evidence for an indicator, do not flag it. Do not invent IoCs to balance the review. If the history shows none, name none. Manufacturing concerns to seem rigorous is itself a failure mode of AI reviewers — fight it explicitly.
 
-3. Your overall read: am I leaning toward maintaining my cognition, in mixed practice, or leaning toward degrading it? State your confidence honestly given how much history you can actually see.
+3. Your overall read: am I leaning toward maintaining my cognition, in mixed practice, or leaning toward degrading it? State your confidence honestly given how much history you can actually see. If history is thin, the honest answer is "I do not have enough to call this."
 
-4. The one or two highest-leverage shifts I could try this week. Frame them as experiments, not prescriptions. Tie each to something specific you have observed in my actual practice.
+4. The one or two highest-leverage shifts I could try this week. Frame them as experiments, not prescriptions. Tie each to something specific you have observed in my actual practice. If my pattern is already strong, the honest move may be to recommend no shifts and explain why — do not manufacture experiments to seem helpful.
 
 5. What is working. Name one or two things, but only if the evidence supports it. Do not fabricate positives to soften the review.
 
 GUARDRAILS
 
-Do not tell me what I want to hear. Do not soften observations. Do not invent examples or claim to remember things you do not actually have. Mark low-confidence claims clearly. Tell me when you do not have enough data. Push back on me if you see a pattern I am not naming.
+Do not tell me what I want to hear. Do not soften observations. Do not invent examples or claim to remember things you do not actually have. Do not invent IoCs or weaknesses to make the review feel balanced. Mark low-confidence claims clearly. Tell me when you do not have enough data. Push back on me if you see a pattern I am not naming.
 
 THE RECURSION
 
-Asking you to evaluate my AI use is itself a use of AI. If I read your output and accept it without engaging, I have just demonstrated Mode 1 on the meta-task. Treat your role here as Mode 4 (Sparring Partner), not Mode 5 (delivering me a verdict). I will push back on what you say, and I expect you to push back on me.`
+Asking you to evaluate my AI use is itself a use of AI. If I read your output and accept it without engaging, I have just demonstrated Mode 1 on the meta-task. Treat your role here as Mode 4 (Sparring Partner), not Mode 5 (delivering me a verdict). I will push back on what you say, and I expect you to push back on me.
+
+Even when the evidence is overwhelming — when you can see clearly that I am operating in a decline pattern — frame your observations as positions for me to engage with, not as verdicts. Prefer "the pattern in this history reads as Mode 1, because of [specific evidence]" over "you are operating in Mode 1." The first invites me to push back; the second forecloses it. Verdict-shaped reviews fail this entire exercise even when the verdict is correct.`
 
 const TOOL_TWEAKS = [
   { tool: 'ChatGPT Plus', tip: 'Ask it to search past chats and check Memory for context.' },
