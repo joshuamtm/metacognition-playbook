@@ -121,13 +121,33 @@ function Reveal({ children, className = '', delay = 0 }) {
 function SideNav() {
   const active = useActiveSection()
   return (
-    <nav className="fixed left-5 top-0 bottom-0 z-50 hidden lg:flex flex-col items-start justify-center gap-1">
-      {SECTIONS.filter(s => s.id !== 'hero').map(({ id, short }) => (
-        <a key={id} href={`#${id}`} className="flex items-center gap-2.5 py-[5px] group transition-all duration-200" title={short}>
-          <div className={`w-[6px] h-[6px] rounded-full shrink-0 transition-all duration-300 ${active === id ? 'bg-[#00b8a9] scale-125 shadow-[0_0_0_3px_rgba(0,184,169,0.15)]' : 'bg-[#d1d5db] group-hover:bg-[#9ca3af]'}`} />
-          <span className={`ui-text text-[10px] tracking-[0.05em] whitespace-nowrap transition-all duration-200 ${active === id ? 'text-[#004d54] font-semibold' : 'text-[#b0b5be] group-hover:text-[#6b7280]'}`}>{short}</span>
-        </a>
-      ))}
+    <nav className="fixed left-6 top-0 bottom-0 z-50 hidden lg:flex flex-col items-start justify-center" aria-label="Section navigation">
+      <div className="relative pl-[14px] border-l border-[#004d54]/12">
+        {SECTIONS.filter(s => s.id !== 'hero').map(({ id, label }) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            className="relative flex items-center gap-3 py-[7px] group transition-all duration-200"
+          >
+            <span
+              className={`absolute -left-[18px] w-[7px] h-[7px] rounded-full shrink-0 transition-all duration-300 ${
+                active === id
+                  ? 'bg-[#00b8a9] scale-125 shadow-[0_0_0_3px_rgba(0,184,169,0.15)]'
+                  : 'bg-[#d1d5db] group-hover:bg-[#9ca3af]'
+              }`}
+            />
+            <span
+              className={`ui-text text-[11px] tracking-[0.04em] whitespace-nowrap transition-all duration-200 ${
+                active === id
+                  ? 'text-[#004d54] font-semibold'
+                  : 'text-[#6b7280] group-hover:text-[#004d54]'
+              }`}
+            >
+              {label}
+            </span>
+          </a>
+        ))}
+      </div>
     </nav>
   )
 }
@@ -285,7 +305,7 @@ function Factors() {
                       <h3 className="text-[17px] text-[#004d54] mb-1" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{f.title}</h3>
                       <p className="ui-text text-[11px] text-[#9ca3af] tracking-wide uppercase">{f.subtitle}</p>
                       {f.badge && <span className="inline-block ui-text text-[10px] font-semibold bg-[#00b8a9]/8 text-[#006d77] px-2.5 py-1 rounded-full mt-3 tracking-wide">{f.badge}</span>}
-                      <p className="text-[15px] text-[#2d2d3f]/65 mt-3 leading-relaxed">{f.takeaway}</p>
+                      <p className="text-[15px] text-[#2d2d3f]/75 mt-3 leading-relaxed">{f.takeaway}</p>
                     </div>
                     <div className="shrink-0 hidden sm:block text-right">
                       <div className="stat-number text-[2.5rem]">{f.stat}</div>
@@ -295,7 +315,7 @@ function Factors() {
                   </div>
                   {expanded === f.num && (
                     <div className="mt-5 pt-5 border-t border-[#004d54]/5 ml-[52px]">
-                      <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed mb-3"><strong className="ui-text text-[#004d54] font-semibold text-[12px] uppercase tracking-wide">Evidence: </strong>{f.evidence}</p>
+                      <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed mb-3"><strong className="ui-text text-[#004d54] font-semibold text-[12px] uppercase tracking-wide">Evidence: </strong>{f.evidence}</p>
                       {f.caveat && <p className="ui-text text-[11px] text-[#d97706] bg-[#d97706]/8 px-3 py-2 rounded-lg inline-block mt-2">{f.caveat}</p>}
                       {f.doi && <a href={f.doi} target="_blank" rel="noopener noreferrer" className="ui-text text-[11px] text-[#00b8a9] hover:underline block mt-3 font-medium">View source →</a>}
                     </div>
@@ -316,9 +336,19 @@ function SevenModes() {
       <div className="max-w-4xl mx-auto">
         <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">The Patterns</p></Reveal>
         <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-3">Seven Modes of AI Use</h2></Reveal>
-        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-3 max-w-xl">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p></Reveal>
-        <Reveal delay={130}><p className="text-[14px] text-[#9ca3af] italic mb-3 max-w-xl">A note on counting: Mode 0 (Lookup) is a baseline condition rather than one of the seven modes — it sits outside the cognitive-stakes spectrum because nothing is being formed or eroded. The seven modes start at Mode 1 (Autopilot). Many readers will use Mode 0 dozens of times a day without it being part of the framework's cognitive-impact picture, and that's the right read.</p></Reveal>
-        <Reveal delay={150}><p className="text-[14px] text-[#9ca3af] italic mb-12 max-w-xl">A note on confidence: the decline-mode evidence (Modes 1 and 2) is stronger than the growth-mode evidence (Modes 3 and 4) in the corpus. Both kinds of mode are real, but the studies showing harm from passive use are larger and more replicated than those showing gains from sparring or stewardship. Read the badges accordingly: growth modes are well-supported but the case for them is still building.</p></Reveal>
+        <Reveal delay={100}><p className="text-[17px] text-[#6b7280] mb-8 max-w-xl">The goal is not to always be in a growth mode. It is to know which mode you are in and choose it deliberately.</p></Reveal>
+        <Reveal delay={130}>
+          <details className="group max-w-xl mb-12 bg-white/40 border border-[#004d54]/10 rounded-xl">
+            <summary className="cursor-pointer list-none px-5 py-3 flex items-center gap-2 ui-text text-[11px] tracking-[0.1em] uppercase font-semibold text-[#004d54] hover:text-[#00b8a9] transition-colors">
+              <svg className="w-3.5 h-3.5 transition-transform group-open:rotate-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+              Notes on the framework
+            </summary>
+            <div className="px-5 pb-5 pt-1 space-y-3 text-[14px] text-[#6b7280] leading-relaxed">
+              <p><strong className="text-[#004d54] font-semibold">A note on counting.</strong> Mode 0 (Lookup) is a baseline condition rather than one of the seven modes — it sits outside the cognitive-stakes spectrum because nothing is being formed or eroded. The seven modes start at Mode 1 (Autopilot). Many readers will use Mode 0 dozens of times a day without it being part of the framework's cognitive-impact picture, and that's the right read.</p>
+              <p><strong className="text-[#004d54] font-semibold">A note on confidence.</strong> The decline-mode evidence (Modes 1 and 2) is stronger than the growth-mode evidence (Modes 3 and 4) in the corpus. Both kinds of mode are real, but the studies showing harm from passive use are larger and more replicated than those showing gains from sparring or stewardship. Read the badges accordingly: growth modes are well-supported but the case for them is still building.</p>
+            </div>
+          </details>
+        </Reveal>
         <div className="grid gap-4">
           {MODES.map((m, i) => (
             <Reveal key={m.num} delay={140 + i * 60}>
@@ -332,7 +362,7 @@ function SevenModes() {
                         <h3 className="text-[15px] text-[#1a1a2e] font-semibold" style={{ fontFamily: 'var(--font-display)' }}>{m.name}</h3>
                         <span className="badge text-[9px] font-semibold px-2 py-[3px] rounded-full uppercase tracking-wider" style={{ background: `${MODE_COLORS[m.color]}15`, color: MODE_COLORS[m.color] }}>{m.badge}</span>
                       </div>
-                      <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed">{m.desc}</p>
+                      <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed">{m.desc}</p>
                       <p className="text-[13px] italic text-[#9ca3af] mt-2.5 leading-relaxed">{m.prompt}</p>
                     </div>
                   </div>
@@ -434,7 +464,7 @@ function Update2026() {
                   <h4 className="ui-text text-[14px] font-bold text-[#004d54] leading-snug">{s.title}</h4>
                   <span className="ui-text text-[10px] text-[#9ca3af] shrink-0">{s.authors} · {s.venue} · {s.year}{s.n && s.n !== '—' ? ` · N=${s.n}` : ''}</span>
                 </div>
-                <p className="text-[14px] text-[#2d2d3f]/65 leading-relaxed mb-3">{s.finding}</p>
+                <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed mb-3">{s.finding}</p>
                 <p className="text-[13px] text-[#006d77] bg-[#00b8a9]/5 px-3 py-2 rounded-lg leading-relaxed">
                   <strong className="ui-text text-[11px] uppercase tracking-wide text-[#004d54]">Implication: </strong>{s.implication}
                 </p>
@@ -499,7 +529,7 @@ function Curriculum() {
                 <div className="text-2xl shrink-0 mt-0.5">{item.icon}</div>
                 <div>
                   <h3 className="text-[16px] text-[#004d54] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{item.title}</h3>
-                  <p className="text-[14px] text-[#2d2d3f]/60 leading-relaxed">{item.desc}</p>
+                  <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             </Reveal>
@@ -533,7 +563,7 @@ function Caveats() {
             <Reveal key={i} delay={100 + i * 40}>
               <div className="flex gap-4 items-start">
                 <div className="w-[6px] h-[6px] rounded-full bg-[#00b8a9]/40 mt-2.5 shrink-0" />
-                <p className="text-[16px] text-[#2d2d3f]/65 leading-relaxed">{item}</p>
+                <p className="text-[16px] text-[#2d2d3f]/75 leading-relaxed">{item}</p>
               </div>
             </Reveal>
           ))}

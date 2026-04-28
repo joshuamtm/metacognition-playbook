@@ -66,6 +66,14 @@ nav, .ui-text, .badge, .nav-link, .stat-label, .factor-num, .mode-num {
 /* Selection */
 ::selection { background: var(--color-mtm-teal); color: white; }
 
+/* Keyboard focus — global accessibility ring */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--color-mtm-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Smooth section transitions */
 section { position: relative; }
 

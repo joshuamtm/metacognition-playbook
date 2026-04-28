@@ -71,9 +71,7 @@ export default function Reviewed() {
   const progressIndex = QUESTION_SCREENS.indexOf(screen)
   const progress =
     progressIndex >= 0
-      ? `${progressIndex + 1} of ${QUESTION_SCREENS.length}${
-          answers.item1 === 'no_recent' && screen !== 'item2' ? ' (one skipped)' : ''
-        }`
+      ? `Step ${progressIndex + 1} of ${QUESTION_SCREENS.length}`
       : null
 
   return (

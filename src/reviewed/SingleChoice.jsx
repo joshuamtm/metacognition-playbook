@@ -1,4 +1,6 @@
 /* Single-choice question component. Used for Items 1, 2, 9, 10, 11. */
+import FormattedText from './FormattedText.jsx'
+
 export default function SingleChoice({ item, value, onChange, onNext, onBack }) {
   return (
     <section className="min-h-screen flex items-center justify-center px-6 pt-16 pb-16">
@@ -7,7 +9,7 @@ export default function SingleChoice({ item, value, onChange, onNext, onBack }) 
           {item.title}
         </p>
         <h2 className="text-[clamp(1.5rem,4vw,2rem)] leading-[1.3] text-[#1a1a2e] mb-10" style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}>
-          {item.prompt}
+          <FormattedText text={item.prompt} />
         </h2>
 
         <div className="space-y-3">

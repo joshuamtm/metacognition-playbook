@@ -1,6 +1,7 @@
 /* Results page — lean signal at top, mode profile, IoC flags, experiments, positive callout. */
 import { DOMAINS, MODE_LABELS, MODE_TIERS } from './items.js'
 import { IOCS } from './iocs.js'
+import FormattedText from './FormattedText.jsx'
 import {
   scoreAnswers,
   leanBand,
@@ -29,25 +30,6 @@ const TIER_LABELS = {
   protected: 'Protected (Hands Off)',
   declared: 'Declared',
   na: "Doesn't apply",
-}
-
-/* Render markdown-like **bold** in headlines */
-function FormattedText({ text }) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g)
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong key={i} className="font-semibold">
-              {part.slice(2, -2)}
-            </strong>
-          )
-        }
-        return <span key={i}>{part}</span>
-      })}
-    </>
-  )
 }
 
 function LeanBlock({ band, signals, item1Skipped }) {
@@ -261,7 +243,7 @@ function Experiments({ recs }) {
                 {rec.headline}
               </h3>
               <div className="text-[15px] leading-[1.7] text-[#2d2d3f]/80 mb-5 whitespace-pre-line">
-                {rec.body}
+                <FormattedText text={rec.body} />
               </div>
               <div className="bg-[#f2f0eb] rounded-lg px-5 py-4 mb-4">
                 <p className="ui-text text-[10px] font-semibold text-[#004d54]/70 tracking-[0.1em] uppercase mb-2">
@@ -294,7 +276,7 @@ function Experiments({ recs }) {
                     {rec.headline}
                   </h3>
                   <div className="text-[14px] leading-[1.7] text-[#2d2d3f]/80 mb-4 whitespace-pre-line">
-                    {rec.body}
+                    <FormattedText text={rec.body} />
                   </div>
                   <p className="text-[12px] leading-[1.55] text-[#6b7280] italic">
                     {rec.evidence}
