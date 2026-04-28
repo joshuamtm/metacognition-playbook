@@ -13,9 +13,7 @@ const SECTIONS = [
   { id: 'evidence', label: 'Evidence Base', short: 'Evidence' },
   { id: 'update-2026', label: 'April 2026 Update', short: 'Update' },
   { id: 'indicators', label: 'Cognitive IoCs', short: 'IoCs' },
-  { id: 'curriculum', label: 'Curriculum', short: 'Week 1' },
   { id: 'caveats', label: 'Caveats', short: 'Caveats' },
-  { id: 'next-steps', label: 'Next Steps', short: 'Next' },
 ]
 
 const FACTORS = [
@@ -81,15 +79,6 @@ const INDICATORS = [
   { name: 'Confidence inflation', signal: 'Feeling more certain than your evidence warrants' },
   { name: 'Verification fatigue', signal: 'Getting tired of checking and defaulting to acceptance' },
   { name: 'Phrase contamination', signal: 'Your writing starting to sound like AI' },
-]
-
-const NEXT_STEPS = [
-  { area: 'PAI Accelerator', icon: '🎓', items: ['Integrate Week 1 module: modes, two questions, mode contracts', 'Mode 7 List exercise → Week 2', 'Mode Contracts → Week 3 Packages', 'Disagreement Audit → Week 4', 'Peer artifact review from Week 2 forward'] },
-  { area: 'MTM Together', icon: '🤝', items: ['“Mode of the Month” discussion series', 'Shareable Mode identification cards', 'Monthly retrospective audit template'] },
-  { area: 'Thought Leadership', icon: '✍️', items: ['Solve Tuesday #10 (1,200–1,500 words)', 'LinkedIn series: Problem → Framework → Practice', 'Conference talk for keynotes & TechSoup', 'Co-author with cognitive scientist'] },
-  { area: 'Client Advisory', icon: '🛡️', items: ['“Deliberate AI Use” policy template for vCISO work', 'Per-client Mode Contract library', 'Cognitive IoCs in security awareness training'] },
-  { area: 'Research & Development', icon: '🔬', items: ['Track Kosmyna replication (Factor 1 flag)', 'Pre/post pilot with Accelerator cohort', 'Explore Wharton / MIT collaboration', '90-day / 180-day longitudinal tracking'] },
-  { area: 'Nonprofit Sector', icon: '🌍', items: ['Position MTM as evidence-grounded voice', 'NTEN / AFP session proposal', 'Module for Nonprofit AI Safety Guide', 'Mode identification self-assessment tool'] },
 ]
 
 /* ─── Hooks ─── */
@@ -522,37 +511,6 @@ function CognitiveIoCs() {
   )
 }
 
-function Curriculum() {
-  const items = [
-    { title: 'The Two-Question Habit', desc: 'Before every significant AI interaction: Q1 (learn or finish?) and Q2 (will I catch a wrong answer?). Clunky for a week, then infrastructure.', icon: '❓' },
-    { title: 'Three Mode Contract Templates', desc: 'For Learning: “Don’t give me the answer until I show my work.” For Stewardship: “Critique, don’t rewrite. Keep my voice.” For Sparring: “Steelman the opposite position.”', icon: '📜' },
-    { title: 'Mode 7 List', desc: 'Write down 2–3 kinds of work where AI does not get a seat at the table. Revisit once a year.', icon: '🛑' },
-    { title: 'Three Self-Check Layers', desc: 'Daily: Two Questions. Weekly: Artifact review (one transcript, four questions). Monthly: “Could I still do this tomorrow if AI disappeared?”', icon: '🔍' },
-    { title: 'Week 1 Exercises', desc: '(1) Review three real AI transcripts against the seven modes. (2) Write three Mode Contracts + your Mode 7 list. (3) Speech Act: say the Mode 6 sentence to a pod partner.', icon: '📝' },
-  ]
-  return (
-    <section id="curriculum" className="py-28 px-6">
-      <div className="max-w-3xl mx-auto">
-        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Week 1 Preview</p></Reveal>
-        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-12">The Curriculum Module</h2></Reveal>
-        <div className="space-y-5">
-          {items.map((item, i) => (
-            <Reveal key={i} delay={100 + i * 60}>
-              <div className="bg-white rounded-xl border border-[#004d54]/8 p-6 card-lift flex gap-5">
-                <div className="text-2xl shrink-0 mt-0.5">{item.icon}</div>
-                <div>
-                  <h3 className="text-[16px] text-[#004d54] mb-2" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>{item.title}</h3>
-                  <p className="text-[14px] text-[#2d2d3f]/75 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function Caveats() {
   const items = [
     'Not all AI use is harmful — growth modes are real when configured and scaffolded well',
@@ -577,32 +535,6 @@ function Caveats() {
               <div className="flex gap-4 items-start">
                 <div className="w-[6px] h-[6px] rounded-full bg-[#00b8a9]/40 mt-2.5 shrink-0" />
                 <p className="text-[16px] text-[#2d2d3f]/75 leading-relaxed">{item}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function NextSteps() {
-  return (
-    <section id="next-steps" className="py-28 px-6">
-      <div className="max-w-4xl mx-auto">
-        <Reveal><p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">Looking Forward</p></Reveal>
-        <Reveal delay={60}><h2 className="text-[clamp(1.8rem,4.5vw,2.8rem)] text-[#004d54] mb-12">Next Steps for MTM</h2></Reveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {NEXT_STEPS.map((section, i) => (
-            <Reveal key={i} delay={100 + i * 60}>
-              <div className="bg-white rounded-xl border border-[#004d54]/8 p-6 h-full card-lift">
-                <div className="text-xl mb-3">{section.icon}</div>
-                <h3 className="ui-text text-[12px] font-bold text-[#004d54] tracking-wide uppercase mb-4">{section.area}</h3>
-                <ul className="space-y-2.5">
-                  {section.items.map((item, j) => (
-                    <li key={j} className="flex gap-2 items-start"><span className="text-[#00b8a9] text-[11px] mt-[3px] shrink-0">→</span><span className="text-[13px] text-[#2d2d3f]/60 leading-relaxed">{item}</span></li>
-                  ))}
-                </ul>
               </div>
             </Reveal>
           ))}
@@ -848,9 +780,7 @@ export default function Report() {
         <Evidence />
         <Update2026 />
         <CognitiveIoCs />
-        <Curriculum />
         <Caveats />
-        <NextSteps />
       </main>
       <Footer />
     </>
