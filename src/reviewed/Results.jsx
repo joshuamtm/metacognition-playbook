@@ -74,6 +74,16 @@ function LeanBlock({ band, signals, item1Skipped }) {
   )
 }
 
+/* 5-segment tier scale, in order. The user's mode maps to one segment;
+   the others render as dim placeholders. */
+const TIER_SCALE = [
+  { tier: 'decline', label: 'Decline' },
+  { tier: 'border', label: 'Border' },
+  { tier: 'conditional', label: 'Conditional' },
+  { tier: 'growth', label: 'Growth' },
+  { tier: 'protected', label: 'Protected' },
+]
+
 function ModeProfile({ answers }) {
   const profile = modeProfile(answers)
   const applicable = profile.filter((p) => p.mode && p.mode !== 'NA')
@@ -85,33 +95,115 @@ function ModeProfile({ answers }) {
         <p className="ui-text text-[#00b8a9] text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">
           Your Mode Profile
         </p>
-        <h2 className="text-[clamp(1.4rem,3.5vw,1.85rem)] text-[#004d54] mb-8" style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}>
+        <h2 className="text-[clamp(1.4rem,3.5vw,1.85rem)] text-[#004d54] mb-3" style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}>
           Where you operate, by domain
         </h2>
+        <p className="text-[14px] text-[#6b7280] mb-8 leading-relaxed max-w-xl">
+          Each row places your AI use for that domain on the cognitive-stakes spectrum. The
+          declared "Mode 6" and the never-used Mode 0 don't appear here — neither involves the
+          formative cognitive work the framework tracks.
+        </p>
+
+        {/* Scale legend */}
+        <div className="hidden sm:grid grid-cols-5 gap-2 mb-3 px-1">
+          {TIER_SCALE.map(({ tier, label }) => (
+            <p
+              key={tier}
+              className="ui-text text-[9px] tracking-[0.08em] uppercase font-semibold text-center"
+              style={{ color: TIER_COLORS[tier].bg }}
+            >
+              {label}
+            </p>
+          ))}
+        </div>
 
         <div className="space-y-4">
           {profile.map(({ domain, mode }) => {
             const tier = mode ? MODE_TIERS[mode] : 'na'
-            const colors = TIER_COLORS[tier]
+            const userSegmentIdx = TIER_SCALE.findIndex((s) => s.tier === tier)
+            const isApplicable = mode && mode !== 'NA'
             return (
-              <div key={domain.id} className="bg-white rounded-xl border border-[#004d54]/8 p-5">
-                <div className="flex items-baseline justify-between gap-4 mb-2">
-                  <p className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.05em] uppercase">
-                    {domain.label}
-                  </p>
-                  <p className="ui-text text-[10px] tracking-[0.1em] uppercase font-semibold" style={{ color: colors.bg }}>
-                    {TIER_LABELS[tier]}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-2 rounded-full flex-1" style={{ backgroundColor: colors.light }}>
-                    <div className="h-full rounded-full" style={{ backgroundColor: colors.bg, width: mode && mode !== 'NA' ? '100%' : '0%' }} />
+              <article
+                key={domain.id}
+                className="bg-white rounded-xl border border-[#004d54]/10 p-5"
+              >
+                <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
+                  <div>
+                    <p className="ui-text text-[12px] font-bold text-[#004d54] tracking-[0.05em] uppercase">
+                      {domain.label}
+                    </p>
+                    <p className="text-[12px] text-[#6b7280] italic">{domain.sub}</p>
                   </div>
-                  <p className="text-[13px] text-[#2d2d3f]/70 shrink-0 max-w-[60%] text-right">
-                    {mode && mode !== 'NA' ? MODE_LABELS[mode] : "Doesn't apply"}
-                  </p>
+                  {isApplicable ? (
+                    <p
+                      className="ui-text text-[11px] tracking-[0.04em] font-semibold"
+                      style={{ color: TIER_COLORS[tier].bg }}
+                    >
+                      {MODE_LABELS[mode]}
+                    </p>
+                  ) : (
+                    <p className="ui-text text-[11px] tracking-[0.04em] font-semibold text-[#9ca3af]">
+                      Doesn't apply
+                    </p>
+                  )}
                 </div>
-              </div>
+
+                {/* 5-segment tier bar */}
+                {isApplicable ? (
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {TIER_SCALE.map(({ tier: segTier }, idx) => {
+                      const isUser = idx === userSegmentIdx
+                      const segColor = TIER_COLORS[segTier]
+                      return (
+                        <div
+                          key={segTier}
+                          className="h-3 rounded-full transition-all duration-300 relative"
+                          style={{
+                            backgroundColor: isUser ? segColor.bg : segColor.light,
+                            transform: isUser ? 'scaleY(1.4)' : 'none',
+                          }}
+                          aria-hidden="true"
+                        >
+                          {isUser && (
+                            <span
+                              className="absolute inset-0 rounded-full"
+                              style={{ boxShadow: `0 0 0 3px ${segColor.light}` }}
+                            />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {TIER_SCALE.map(({ tier: segTier }) => (
+                      <div
+                        key={segTier}
+                        className="h-3 rounded-full bg-[#e5e7eb] opacity-50"
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Sub-labels under the scale (mobile fallback — labels render under each segment when sm legend hidden) */}
+                <div className="grid grid-cols-5 gap-1.5 mt-1.5 sm:hidden">
+                  {TIER_SCALE.map(({ tier: segTier, label }, idx) => {
+                    const isUser = isApplicable && idx === userSegmentIdx
+                    return (
+                      <p
+                        key={segTier}
+                        className={`ui-text text-[8px] tracking-[0.04em] uppercase text-center ${
+                          isUser ? 'font-semibold' : 'text-[#9ca3af]'
+                        }`}
+                        style={isUser ? { color: TIER_COLORS[segTier].bg } : {}}
+                      >
+                        {label}
+                      </p>
+                    )
+                  })}
+                </div>
+              </article>
             )
           })}
         </div>
