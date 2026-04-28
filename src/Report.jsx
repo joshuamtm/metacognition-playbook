@@ -515,16 +515,15 @@ function CognitiveIoCs() {
 
 function Caveats() {
   const items = [
-    'Not all AI use is harmful — growth modes are real when configured and scaffolded well',
-    'Metacognitive awareness alone is not sufficient — needs Mode Contracts, rituals, peer review',
-    'Research is mostly students and knowledge workers — nonprofit generalization is extrapolation',
-    'Mode 6 has zero direct empirical support — operationalized via speech act',
-    'Factor 1 (Kosmyna) rests on N=9 in a preprint sub-analysis',
-    'Growth-mode evidence is thinner than decline-mode evidence in this corpus',
-    'The framework may need rewriting when longitudinal data on professionals arrives',
-    'Population-scale effects — homogenization of language, perspective, and reasoning across users sparring with the same model — are real and outside this framework’s scope',
-    'Engagement is necessary but not sufficient — heavy AI use produces cognitive fatigue (“brain fry”) even among engaged users; dose still matters',
-    'The author sells a PAI Accelerator — conflict of interest disclosed',
+    'Not all AI use is harmful — the growth modes are real when AI use is configured and supported well.',
+    'Self-awareness alone is not enough. Knowing about these modes does not protect you from drifting into them; the practice has to be built into how you work.',
+    'Most of the underlying research is on students and knowledge workers. Applying the framework to nonprofit professionals is an extrapolation, not a direct finding.',
+    'Mode 6 (Good Enough on Purpose) has no studies directly testing it. It exists in the framework only because users can declare it out loud — there is no measured evidence yet that the practice works.',
+    'Factor 1 (Order of Exposure) rests heavily on a small sub-section of a single study with only 9 participants, which has not yet been peer-reviewed. If that finding does not hold up in larger replications, this part of the framework will need to change.',
+    'The studies showing AI helps cognition (the growth modes) are smaller and less replicated than the studies showing AI harms it (the decline modes). Both kinds of mode are real, but the case for the harmful patterns is currently better-supported.',
+    'Most existing studies are short-term. When studies tracking professionals over months or years come out, parts of this framework may need to be rewritten.',
+    'Even if you use AI well as an individual, when many people use the same AI model, their language and ideas may converge over time toward what the AI suggests. That collective effect is real, but this framework does not try to address it.',
+    'Active engagement is necessary but not sufficient. Heavy AI use produces cognitive fatigue (informally called “brain fry”) even among engaged users — the amount of AI-mediated work still matters, not only the quality of engagement.',
   ]
   return (
     <section id="caveats" className="py-28 px-6 bg-[#f2f0eb]">
